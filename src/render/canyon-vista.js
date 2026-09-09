@@ -13,8 +13,8 @@ export function loadCanyonVista() {
   const base = import.meta.env?.BASE_URL ?? './';
   const loader = new TextureLoader();
   loading = Promise.all([
-    loader.loadAsync(`${base}art/vistas/canyon-vista.webp`),
-    fetch(`${base}art/vistas/canyon-ridgeline.json`).then(response => {
+    loader.loadAsync(`${base}art/vistas/canyon-vista-impasto-candidate.webp`),
+    fetch(`${base}art/vistas/canyon-ridgeline-impasto-candidate.json`).then(response => {
       if (!response.ok) throw new Error(`Canyon skyline: HTTP ${response.status}`);
       return response.json();
     }),

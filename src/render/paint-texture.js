@@ -77,6 +77,10 @@ export function loadOilPaintTexture() {
   const pigmentLoading = new TextureLoader().loadAsync(`${import.meta.env.BASE_URL}art/materials/impasto-pigment.webp`).then(pigment => {
     pigment.name = 'PIGMENT / marbled artist pigments';
     pigment.colorSpace = SRGBColorSpace;
+    // Canvas pixels and DataTexture both keep the source's top row first.
+    // TextureLoader otherwise flips only albedo, separating its brush edges
+    // from the CPU/GPU relief field even though the source images align.
+    pigment.flipY = false;
     pigment.wrapS = pigment.wrapT = MirroredRepeatWrapping;
     pigment.anisotropy = 4;
     pigment.needsUpdate = true;

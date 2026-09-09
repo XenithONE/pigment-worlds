@@ -9,6 +9,7 @@ import { addPaintValley, valleyHeight, valleyRiverContains } from './paint-valle
 import { addBotanicalSculptures } from './botanical-sculptures.js';
 import { addSculptedCanyon, canyonHeight, canyonRiverContains } from './sculpted-canyon.js';
 import { addPaintedTree } from './painted-tree.js';
+import { addCanyonPlanting } from './canyon-planting.js';
 
 // The scenery is original, traversable geometry. Generated paintings supply the
 // sky panoramas; small, instanced impasto marks make up the living foreground.
@@ -173,7 +174,15 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
   }
   function stamp(name, geometry, mat, x, y, z, sx, sy, sz, rx, ry, rz, col, groundGrowth = false) {
     if (groundGrowth && groundGrowthGap(x, z)) return;
+    if (id === 2 && name === 'fallen-pigment') return;
     if (name === 'grass' && id !== 3) geometry = grassGeo;
+    if (id === 2 && name === 'grass') {
+      // Low, wet strands of dark pigment sit among the complete flowers.
+      // Deterministic thinning preserves the scenery random stream.
+      if (Math.sin(x * 71.31 + z * 53.19) < .72) return;
+      sy *= .55; sx *= .65; sz *= .7; y = baseHeight(x, z) + sy * .34;
+      col = '#47685a';
+    }
     if (id === 2 && ['flowers','flower-stems','pollen'].includes(name)) { sx*=.64;sy*=.72;sz*=.64; }
     const key = spatialBatches.has(name) ? `${name}:${Math.floor(x / 12)},${Math.floor(z / 12)}` : name;
     if (!batches.has(key)) batches.set(key, { name, key, geometry, mat, items: [] });
@@ -557,11 +566,14 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
   const heroTree = id === 2 ? addPaintedTree(scene,{position:[-8.5,baseHeight(-8.5,-3),-3],seed:5921,scale:.9}) : null;
   if(heroTree) obstacles.push({x:-8.5,z:-3,radius:1.5});
   const removeBotanicals = addBotanicalSculptures(scene,{id,baseHeight,pathX,isPond,isSea,density:1.7});
+  const canyonPlants = id === 2 ? addCanyonPlanting(scene,{pathX,baseHeight,isPond,clearings:clearingPositions}) : null;
+  if(canyonPlants) obstacles.push(...canyonPlants.obstacles);
   flush();
 
   function updateDetail(camera) {
     if (!camera) return;
     removeBotanicals.update?.(camera, detailLevel);
+    canyonPlants?.update(camera, detailLevel);
     const mobileAuto = detailLevel === 'auto' && typeof matchMedia === 'function' && (matchMedia('(pointer: coarse)').matches || matchMedia('(max-width: 700px)').matches);
     const low = detailLevel === 'low' || mobileAuto, high = detailLevel === 'high';
     const near = low ? 9 : high ? 28 : 21, middle = low ? 18 : high ? 52 : 40;
@@ -583,7 +595,7 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
       if (reducedMotion || Math.abs(time - lastDetailUpdate) > .18) { updateDetail(camera); lastDetailUpdate = time; }
     },
     dispose() {
-      removePaintedFlora();removePaintValley();removeBotanicals();canyon?.dispose();heroTree?.dispose();
+      removePaintedFlora();removePaintValley();removeBotanicals();canyon?.dispose();heroTree?.dispose();canyonPlants?.dispose();
       geometries.forEach(g => g.dispose()); materials.forEach(m => m.dispose()); textures.forEach(t => t.dispose());
       scene.traverse(obj => { if (obj.isInstancedMesh) obj.dispose(); }); scene.clear();
     },

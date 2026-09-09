@@ -1,56 +1,392 @@
 {
-  "limits": "CPU check with blank image/canvas adapters; no GPU, art decoding or shader validation",
-  "sourceGeometryCount": 74,
-  "sourceMaterialCount": 31,
-  "finiteGeometry": true,
-  "finiteInstanceMatrices": true,
-  "botanicalTrianglesByQuality": {
-    "high": 2016988,
-    "auto": 1959708,
-    "low": 1101978
-  },
-  "targets": [
-    {
-      "name": "spawn",
-      "x": -3.5,
-      "z": 15,
-      "height": 9.212594371487585,
-      "slope": 0.018592258310555276,
-      "nearestObstacleClearance": 16.921541692269404
-    },
-    {
-      "name": "2-a",
-      "x": -5,
-      "z": 4,
-      "height": 8.911742586531771,
-      "slope": 0.035040300291093715,
-      "nearestObstacleClearance": 6.0662379212492645
-    },
-    {
-      "name": "2-b",
-      "x": 12,
-      "z": -3,
-      "height": 8.980796707575697,
-      "slope": 0.014099131477769426,
-      "nearestObstacleClearance": 18.74
-    },
-    {
-      "name": "2-c",
-      "x": -7,
-      "z": -18,
-      "height": 8.684711679799051,
-      "slope": 0.023992021456096434,
-      "nearestObstacleClearance": 13.314813431681335
-    },
-    {
-      "name": "portal",
-      "x": 7,
-      "z": -8,
-      "height": 8.817484797215846,
-      "slope": 0.03443495458083424,
-      "nearestObstacleClearance": 14.526497474902333
-    }
+  "version": 14,
+  "auditedAt": "2026-09-09T17:39:50.485Z",
+  "passed": true,
+  "richPigment": true,
+  "scope": "CPU integration of world 2, all exercised LODs, real decoded relief field, rest attributes, material hook/cache branches, collision routes and observed world-owned resource lifetimes.",
+  "limitations": [
+    "No GPU rendering, GLSL linking, browser image/canvas decoding, texture upload or mipmap validation.",
+    "Physical relief field is reconstructed from the actual 1024px atlas using the runtime Float32 box-blur recipe; this is not the browser loader instance.",
+    "Procedural CanvasTexture drawing uses an inert adapter; palette pixels and visual quality are not assessed.",
+    "Shared art uses decoded file metadata and remains cached; GPU-only render targets/PMREM/shadow allocations are outside this CPU audit.",
+    "Exactly-once accounting covers scene-observed source resources across LOD probes, displaced geometries and generated oil materials, not unattached CPU-only temporary allocations."
   ],
+  "sourceHashes": {
+    "src/main.js": "272e80525f617c3d52c4916b4f355cb670a044d47deaad9aa55d7ec5489957de",
+    "src/render/worlds.js": "36e3be00255202d2521df10303e23bf3a0b54bf3287f3a3e28da483d648d70c4",
+    "src/render/surface-relief.js": "4f0a9bae33f861415d8785db7731dce434ce132d664ca58c5a4a6c1ced7b3eae",
+    "src/render/oil-material.js": "67558466e5a47dcc2ee39b43f7ec636373e9ca20d6c36c6754b696b0d0940680",
+    "src/render/paint-texture.js": "dc61b9d522ef261866bbd4723d262c516ea9f75381baa29736c4c521280a9cb5",
+    "src/render/sculpted-canyon.js": "7b8f151fd0245355a4812e29573c8b2c1b7e242463e40053dbf2a16258a337a7",
+    "src/render/canyon-planting.js": "6e1ac50e34fadaa7771b9d43f6343614087286375e4e21c0ab44c9496b73229d",
+    "src/render/pigment-cypress.js": "cf22e223a94b269a3d7b4ead80b2ad554d5cf452382356d90b190aaa49234b38",
+    "src/render/painted-tree.js": "08484679010fa13eddc3a44eec58ba0dd09921b15bc5ea86c51c7f0bcf3b7b03",
+    "src/render/canyon-vista.js": "fe636af2b595dff4c96c6eb9abaebdd5dcdf437686b7804a2ee7f0e6a8ddb749"
+  },
+  "atlases": {
+    "relief": {
+      "path": "public/art/materials/impasto-relief.webp",
+      "sha256": "057ca97a4ad074cdd0e328469c5bc9beaae869826520745249e41f480ba04633",
+      "width": 1024,
+      "height": 1024
+    },
+    "pigment": {
+      "path": "public/art/materials/impasto-pigment.webp",
+      "sha256": "f1573810ba4df6f863bbf86558f96a1d9f6b9f757b4d75d7ec2db39f629e6269",
+      "width": 1254,
+      "height": 1254
+    },
+    "loadedAssets": [
+      {
+        "asset": "art/materials/flora-atlas.webp",
+        "width": 1254,
+        "height": 1254
+      },
+      {
+        "asset": "art/vistas/canyon-vista-impasto-candidate.webp",
+        "width": 2172,
+        "height": 724
+      },
+      {
+        "asset": "art/starry-sky.webp",
+        "width": 1774,
+        "height": 887
+      },
+      {
+        "asset": "art/garden-sky.webp",
+        "width": 1774,
+        "height": 887
+      },
+      {
+        "asset": "art/golden-sky.webp",
+        "width": 1774,
+        "height": 887
+      },
+      {
+        "asset": "art/mist-sky.webp",
+        "width": 1774,
+        "height": 887
+      },
+      {
+        "asset": "art/starry-portal.webp",
+        "width": 1086,
+        "height": 1448
+      },
+      {
+        "asset": "art/garden-portal.webp",
+        "width": 1086,
+        "height": 1448
+      },
+      {
+        "asset": "art/golden-portal.webp",
+        "width": 900,
+        "height": 1350
+      },
+      {
+        "asset": "art/mist-portal.webp",
+        "width": 1086,
+        "height": 1448
+      }
+    ]
+  },
+  "geometry": {
+    "sourceCount": 81,
+    "displacedCount": 4,
+    "checkedAttributeValues": 16550443,
+    "normalMinimum": 0.09486832787846378,
+    "normalMaximum": 1.0000000489746064,
+    "zeroNormals": [],
+    "unusedZeroNormals": [
+      {
+        "users": [
+          "rocks"
+        ],
+        "type": "SphereGeometry",
+        "attribute": "normal",
+        "vertex": 18,
+        "reason": "This pole/seam vertex is absent from the index buffer; it cannot reach a rendered triangle."
+      },
+      {
+        "users": [
+          "rocks"
+        ],
+        "type": "SphereGeometry",
+        "attribute": "normal",
+        "vertex": 228,
+        "reason": "This pole/seam vertex is absent from the index buffer; it cannot reach a rendered triangle."
+      }
+    ],
+    "anchoredObjects": [
+      "sculpted-canyon-topography",
+      "walkable-paint-ribbon",
+      "canyon-near-continuous-paint-face",
+      "canyon-far-continuous-paint-face"
+    ],
+    "canyonJoins": [
+      {
+        "name": "canyon-near-continuous-paint-face",
+        "anchoredEdgeVertices": 1602,
+        "maxEdgeDisplacement": 0,
+        "maxInteriorDisplacement": 0.194757397475285
+      },
+      {
+        "name": "canyon-far-continuous-paint-face",
+        "anchoredEdgeVertices": 1602,
+        "maxEdgeDisplacement": 0,
+        "maxInteriorDisplacement": 0.2062903096606542
+      }
+    ],
+    "finiteInstanceBuffers": 263
+  },
+  "materials": {
+    "sourceCount": 33,
+    "oilCount": 23,
+    "restVariants": [
+      {
+        "key": "pigment-viscous-atlas-v11-canyon-false-true-true",
+        "anchored": true,
+        "scale": [
+          0.16,
+          0.13,
+          0.16
+        ],
+        "direct": 0.55
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-path-false-true-true",
+        "anchored": true,
+        "scale": [
+          0.32,
+          0.32,
+          0.32
+        ],
+        "direct": 0.85
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-gold-false-true-false",
+        "anchored": false,
+        "scale": [
+          0.6,
+          0.42,
+          0.6
+        ],
+        "direct": 0
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-gold-false-true-false",
+        "anchored": false,
+        "scale": [
+          0.6,
+          0.42,
+          0.6
+        ],
+        "direct": 0
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-bark-false-true-false",
+        "anchored": false,
+        "scale": [
+          0.62,
+          0.16,
+          0.62
+        ],
+        "direct": 0
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-rock-false-true-false",
+        "anchored": false,
+        "scale": [
+          0.3,
+          0.23,
+          0.3
+        ],
+        "direct": 0.75
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-gold-false-true-false",
+        "anchored": false,
+        "scale": [
+          0.6,
+          0.42,
+          0.6
+        ],
+        "direct": 0
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-canyon-false-true-true",
+        "anchored": true,
+        "scale": [
+          0.16,
+          0.13,
+          0.16
+        ],
+        "direct": 0.55
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-canyon-false-true-false",
+        "anchored": false,
+        "scale": [
+          0.16,
+          0.13,
+          0.16
+        ],
+        "direct": 0.55
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-canyon-false-true-false",
+        "anchored": false,
+        "scale": [
+          0.16,
+          0.13,
+          0.16
+        ],
+        "direct": 0.55
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-canyon-false-true-false",
+        "anchored": false,
+        "scale": [
+          0.16,
+          0.13,
+          0.16
+        ],
+        "direct": 0.55
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-canyon-false-true-false",
+        "anchored": false,
+        "scale": [
+          0.16,
+          0.13,
+          0.16
+        ],
+        "direct": 0.55
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-canyon-false-true-false",
+        "anchored": false,
+        "scale": [
+          0.16,
+          0.13,
+          0.16
+        ],
+        "direct": 0.55
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-canyon-false-true-false",
+        "anchored": false,
+        "scale": [
+          0.16,
+          0.13,
+          0.16
+        ],
+        "direct": 0.55
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-canyon-false-true-false",
+        "anchored": false,
+        "scale": [
+          0.16,
+          0.13,
+          0.16
+        ],
+        "direct": 0.55
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-bark-false-true-false",
+        "anchored": false,
+        "scale": [
+          0.62,
+          0.16,
+          0.62
+        ],
+        "direct": 0
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-bark-false-true-false",
+        "anchored": false,
+        "scale": [
+          0.62,
+          0.16,
+          0.62
+        ],
+        "direct": 0
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-foliage-true-true-false",
+        "anchored": false,
+        "scale": [
+          1,
+          0.5,
+          1
+        ],
+        "direct": 0
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-foliage-false-true-false",
+        "anchored": false,
+        "scale": [
+          1,
+          0.5,
+          1
+        ],
+        "direct": 0
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-foliage-true-true-false",
+        "anchored": false,
+        "scale": [
+          1,
+          0.5,
+          1
+        ],
+        "direct": 0
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-foliage-false-true-false",
+        "anchored": false,
+        "scale": [
+          1,
+          0.5,
+          1
+        ],
+        "direct": 0
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-foliage-true-true-false",
+        "anchored": false,
+        "scale": [
+          1,
+          0.5,
+          1
+        ],
+        "direct": 0
+      },
+      {
+        "key": "pigment-viscous-atlas-v11-foliage-false-true-false",
+        "anchored": false,
+        "scale": [
+          1,
+          0.5,
+          1
+        ],
+        "direct": 0
+      }
+    ],
+    "cacheProbe": {
+      "distinctMaterials": true,
+      "distinctProgramKeys": true
+    }
+  },
+  "planting": {
+    "instances": 132,
+    "obstacleCount": 57,
+    "trianglesBeforeFrustum": {
+      "high": 2084348,
+      "auto": 1507248,
+      "low": 1339728
+    }
+  },
   "routes": [
     {
       "target": "2-a",
@@ -64,7 +400,7 @@
     {
       "target": "2-b",
       "reachable": true,
-      "testedPositions": 2154,
+      "testedPositions": 2098,
       "reached": {
         "x": 10,
         "z": -2
@@ -73,7 +409,7 @@
     {
       "target": "2-c",
       "reachable": true,
-      "testedPositions": 2976,
+      "testedPositions": 2900,
       "reached": {
         "x": -5,
         "z": -17
@@ -90,11 +426,21 @@
     }
   ],
   "resources": {
-    "originalsDisposedOnce": true,
+    "countsByKind": {
+      "sourceGeometry": 81,
+      "sourceMaterial": 33,
+      "ownedTexture": 5,
+      "instanceBuffer": 263,
+      "displacedGeometry": 4,
+      "oilMaterial": 23
+    },
+    "ownedAllDisposedExactlyOnce": true,
     "undisposed": [],
     "multiplyDisposed": [],
-    "oilMaterialCount": 22,
-    "oilAllDisposedOnce": true,
+    "retainedSharedTextures": 12,
+    "sharedTexturesRetained": true,
     "sceneEmpty": true
-  }
+  },
+  "elapsedMilliseconds": 15772.2615,
+  "failures": []
 }

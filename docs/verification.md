@@ -1,27 +1,28 @@
-# Golden canyon verification — 2026-09-10
+# Material and canyon revision verification — v14, 2026-09-10
 
-World 03 is now a walkable golden canyon. The connected banks roll over raised paint lips into a wide blue-and-ochre pigment river. A red-gold tree has a twisted solid trunk, roots, small branches and 1,440 thin painted leaves. Sculpted iris and wildflower drifts replace the large repeated flowers beside its path. A fixed original castle panorama and mountain-only side arcs complete its distant horizon. The four worlds and twelve discoveries remain.
+The four worlds retain their twelve discoveries. This revision aligns pigment colour with sculpted relief, restores stronger cobalt/ochre paint values, deepens the continuous canyon faces, and adds terrace groves with route-aware collision proxies. [Material revision](../design/material-revision.md) records the implementation and rejected experiment.
 
-## Checks
+## Completed checks
 
-- `npm test`: 16 passing tests. The added checks exercise routes to all canyon discoveries and its portal, and sustained sprinting against the canyon rim.
-- `npm run build`: succeeds; JavaScript is about 767 kB / 212 kB gzip. The configured 700 kB chunk advisory remains non-fatal.
-- Actual keyboard walking collected all 12 colours and restored them after reloading. Diagnostics were read to plan routes; position and save data were not edited. World-selection focus was checked, including the fix that returns keyboard focus to the canvas after travel.
-- Actual drag-look covered the canyon entrance, river overlook, tree, west, south and east. The 360-degree mountain backdrop showed no open horizon gaps. No page or console error occurred in this exploration.
-- Independent CPU audits checked triangle orientation, finite geometry, instance transforms, quality-dependent botanical LOD, reachable collision/terrain routes, and one-time geometry/material/instance disposal. They supplement the browser checks rather than proving visual quality.
+- `npm test`: 16 tests pass, including routes to the canyon's three colours and portal around the tree and new groves, and sustained sprinting against the canyon rim.
+- `npm run build`: succeeds; JavaScript 778.17 kB / 215.92 kB gzip. The configured 700 kB chunk advisory remains non-fatal.
+- The [CPU integration audit](canyon-integration-verification.json) passes with the decoded relief field, anchored material variants, grove collision routes and 409 observed owned resources disposed exactly once. It retains 12 shared textures. Two zero normals belong only to unused pole vertices; GPU upload/linking and temporary unattached resources are outside this audit.
+- v14 desktop captures visited all four worlds in High quality. Each reached a ready state and recorded actual keyboard movement. No page/console error, error panel or horizontal overflow was recorded.
+- v14 390 × 844 touch-viewport captures visited all four worlds in Auto quality without page/console errors, an error panel or horizontal overflow. These captures establish rendering and layout; movement controls are checked separately.
+- The v14 keyboard journey collected all twelve colours and restored all twelve after reload, with no recorded errors. Diagnostics were read for route planning; position and save data were not edited. Travel through the world selector returned keyboard focus to the canvas.
+- Desktop and emulated touch-viewport controls passed movement, drag-look, sound-toggle state, photo download, Low/High/Auto selection and return to the canyon entrance. The motion option was also exercised. Pointer-driven joystick movement was tested in the touch viewport; this was not a physical touchscreen test.
+- Six fresh canyon views covered the entrance, river overlook, tree/castle, west, south and east using keyboard movement and drag-look. All remained ready, with no recorded page/console errors or visible open horizon gaps in the inspected views. These samples are not exhaustive coverage of every location or angle.
 
-Final desktop and mobile-viewport screenshots, collected-colour evidence and observed timings are recorded in [browser-verification.json](browser-verification.json). Desktop/touch controls for sound, photo download, movement and drag also passed. High/Auto/Low quality, motion toggle and return to the entrance were exercised in the rebuilt canyon on both viewports.
+## Evidence and visual limits
 
-## Visual evidence and limits
+Packaged evidence: [browser-verification.json](browser-verification.json). [Night](screenshots/world-0.webp) · [Garden](screenshots/world-1.webp) · [Canyon](screenshots/world-2.webp) · [Coast](screenshots/world-3.webp) · [Mobile canyon](screenshots/mobile-canyon.webp) · [Journal](screenshots/journal-complete.webp). Raw v14 runs are retained in the local QA workspace; the packaged record identifies each run's scope.
 
-[Night](screenshots/world-0.webp) · [Garden](screenshots/world-1.webp) · [Canyon](screenshots/world-2.webp) · [Coast](screenshots/world-3.webp) · [Canyon on a mobile viewport](screenshots/mobile-canyon.webp) · [Completed journal](screenshots/journal-complete.webp).
+The desktop entry set precedes only the final smooth cliff-join taper; mobile captures and the final directional inspection include it. The packaged canyon screenshot and portfolio photo cover use the entrance from that final inspection. Garden captures precede refreshing the canyon portal thumbnail, so that final thumbnail is outside their verification scope.
 
-These are actual browser renders. The portfolio cover comes from the in-game photo function. A separate experiment placed thousands of small surface-aligned paint strokes on rocks and paths. Two versions were rejected: they resembled pasted scales and did not justify their geometry cost. That experiment is excluded from the application.
+Actual browser views show richer paint colour and more visible cliff detail than the previous revision. Some ground and cliff surfaces still read as repeated decorative patterns; their smooth large shapes lack the reference's irregular rolled paint edges. The large central tree and flower beds partly obscure the river from the entrance. The tree's twisted trunk and separate leaves also remain visibly modeled. This revision does not establish reference-equivalent visual quality.
 
-The supplied reference still has finer, more irregular scenery and more convincing continuous oil-paint surfaces. The canyon tree, terrain and river remain visibly procedural in some views. Publication of this revision is not a claim of reference-equivalent quality or completion of the broader visual-quality goal.
+The tested GPU is an NVIDIA GeForce GTX 1080 Ti through Chromium/ANGLE. Desktop High captures recorded roughly 18.1–18.2 ms median and 18.3 ms p95 frame intervals on this computer; these are short local observations, not hardware-independent performance guarantees. A touch viewport is not a physical-phone test. ANGLE recorded non-fatal shader warnings; no shader failure was observed.
 
-The tested GPU is an NVIDIA GeForce GTX 1080 Ti through Chromium/ANGLE. Recorded frame times apply to this computer. A 390 × 844 touch viewport is not a physical-phone performance test. ANGLE emits non-fatal warnings in Three.js environment and AO/shadow shaders; no shader failure was observed.
+Near plants, tree and canyon are 3D. Middle-distance flowers also use crossed image planes. Distant castle and mountains are fixed paintings on curved meshes; their buildings cannot be entered. Sky and portal pictures are images. Relief is artistic geometry and shading, not physical paint-fluid simulation. Collision proxies cover important rocks, trunks and nearby groves rather than every decorative detail.
 
-Close plants, tree and canyon are 3D. Middle-distance flowers also use crossed image planes. Distant castle and mountains are static images on fixed curved meshes; their buildings cannot be entered. Sky and portal pictures are images too. The paint is artistic geometry and shading, not a physical fluid simulation. The steep-slope guard covers the night valley and golden canyon. Circular obstacle proxies cover important rocks and trunks rather than every decorative detail.
-
-[Publication record](publication.md) · [Canyon image provenance](../design/canyon-vista-prompts.md).
+[Publication record](publication.md) · [Canyon image provenance](../design/canyon-impasto-candidate-prompts.md).

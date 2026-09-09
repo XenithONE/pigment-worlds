@@ -17,6 +17,7 @@ uniform float uOilPigment;
 uniform vec3 uOilColorWeights;
 uniform float uOilFold;
 uniform float uOilLeafValue;
+uniform float uOilDirectPigment;
 
 vec4 oilSwipe(vec2 p, out vec3 paintedColor) {
   float bend = sin(p.y * 3.1 + sin(p.y * .79)) * .038;
@@ -94,7 +95,14 @@ function averageCanvasPigment(material) {
   return new Color().setRGB(r / (64 * 255), g / (64 * 255), b / (64 * 255), SRGBColorSpace);
 }
 
-export function applyOilMaterials(scene) {
+const richProfiles = {
+  ground: { scale: [.34, .28, .34], direct: .60, depth: .052, roughness: .40, coat: .52 },
+  canyon: { scale: [.16, .13, .16], direct: .55, depth: .11, roughness: .40, coat: .55 },
+  path: { scale: [.32, .32, .32], direct: .85, depth: .065, roughness: .35, coat: .64 },
+  rock: { scale: [.30, .23, .30], direct: .75, depth: .095, roughness: .37, coat: .62 },
+};
+
+export function applyOilMaterials(scene, { richPigment = false } = {}) {
   const coatings = new Map(), originals = [], time = { value: 0 };
   scene.traverse(object => {
     if (!object.isMesh) return;
@@ -103,14 +111,17 @@ export function applyOilMaterials(scene) {
       if (!original?.isMeshStandardMaterial) return original;
       // Flowing paint water owns a separate physical shader and its uniforms.
       if (original.userData.pigmentSurface === 'liquid' || original.userData.preservePaintColor) return original;
-      const surface = surfaceFor(object, original), profile = profiles[surface];
+      const surface = surfaceFor(object, original);
+      const profile = { ...profiles[surface], ...(richPigment ? richProfiles[surface] : {}) };
       const moving = surface === 'foliage' && /grass|flower|foliage|tree-pigment|canopy|willow/i.test(object.name);
+      const anchored = Boolean(object.geometry?.attributes.oilRestPosition && object.geometry?.attributes.oilRestNormal);
       if (!coatings.has(original)) coatings.set(original, new Map());
-      const variants = coatings.get(original), key = `${surface}:${moving}`;
+      const variants = coatings.get(original), key = `${surface}:${moving}:${anchored}`;
       if (variants.has(key)) return variants.get(key);
       const material = new MeshPhysicalMaterial();
       MeshStandardMaterial.prototype.copy.call(material, original);
       material.defines = { STANDARD: '', PHYSICAL: '' };
+      if(anchored) material.defines.USE_OIL_REST = '';
       material.name = `${original.name || surface} / viscous oil`;
       material.userData = { ...original.userData, pigmentSurface: surface };
       // The old CanvasTexture repeated like linen. Preserve its palette as
@@ -135,13 +146,22 @@ export function applyOilMaterials(scene) {
         shader.uniforms.uOilColorWeights = { value: new Vector3(...profile.color) };
         shader.uniforms.uOilFold = { value: profile.fold };
         shader.uniforms.uOilLeafValue = { value: surface === 'foliage' ? 1 : 0 };
+        shader.uniforms.uOilDirectPigment = { value: profile.direct ?? 0 };
         shader.vertexShader = shader.vertexShader.replace('#include <common>', `#include <common>
           varying vec3 vOilPosition;
           varying vec3 vOilRestNormal;
+          #ifdef USE_OIL_REST
+            attribute vec3 oilRestPosition;
+            attribute vec3 oilRestNormal;
+          #endif
           uniform float uOilTime;`);
         shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
           vOilPosition = position;
           vOilRestNormal = normal;
+          #ifdef USE_OIL_REST
+            vOilPosition = oilRestPosition;
+            vOilRestNormal = oilRestNormal;
+          #endif
           float oilPhase = 0.;
           #ifdef USE_INSTANCING
             vec3 oilOrigin = instanceMatrix[3].xyz;
@@ -183,7 +203,10 @@ export function applyOilMaterials(scene) {
           // the scalar leaves its hue intact and follows the same local relief.
           float leafStroke = smoothstep(.18, .72, oil.y * .8 + oil.x * .2);
           diffuseColor.rgb *= mix(1., mix(.65, 1.15, leafStroke), uOilLeafValue);
-          diffuseColor.rgb *= 1. - oil.z * .065;`);
+          diffuseColor.rgb *= 1. - oil.z * .065;
+          // Keep the artist's actual pigment values in broad paint deposits.
+          // The physical relief still supplies view-dependent light and shadow.
+          diffuseColor.rgb = mix(diffuseColor.rgb, paintedColor, uOilDirectPigment * uOilPaintReady);`);
         shader.fragmentShader = shader.fragmentShader.replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
           vec3 oilS = dFdx(-vViewPosition), oilT = dFdy(-vViewPosition);
           vec3 oilR1 = cross(oilT, normal), oilR2 = cross(normal, oilS);
@@ -202,7 +225,7 @@ export function applyOilMaterials(scene) {
             material.clearcoatRoughness = clamp(material.clearcoatRoughness + (1. - oil.y) * .10 - oil.z * .08, .14, .4);
           #endif`);
       };
-      material.customProgramCacheKey = () => `pigment-viscous-atlas-v9-${surface}-${moving}`;
+      material.customProgramCacheKey = () => `pigment-viscous-atlas-v11-${surface}-${moving}-${richPigment}-${anchored}`;
       material.needsUpdate = true;
       variants.set(key, material);
       return material;

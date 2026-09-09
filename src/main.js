@@ -96,9 +96,10 @@ function setWorld(id){
   });
   const disposeWorld=world.dispose;
   world.dispose=()=>{vista.dispose();canyonVista?.dispose();disposeWorld();};
-  world.relief=applySculptedRelief(world.scene);
+  const richPigment=true;
+  world.relief=applySculptedRelief(world.scene,{richPigment});
   world.memoryMeshes.forEach(group=>group.traverse(object=>{object.castShadow=false;}));
-  world.oil=applyOilMaterials(world.scene);
+  world.oil=applyOilMaterials(world.scene,{richPigment});
   world.scene.environment=environmentMaps[id].texture;
   world.scene.environmentIntensity=id===0?.22:.18;
   // A low, warm key skims the raised paint; restrained sky fill leaves cool

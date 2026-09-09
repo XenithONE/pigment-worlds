@@ -179,13 +179,13 @@ export function addPaintedTree(scene, { position = [0, 0, 0], seed = 42719, scal
     { p: [-.3, 13.7, 2.0], size: [2.0, 1.2, 1.6], shade: 0 },
   ];
   const crownPalette = [
-    ['#451220', '#a02b2e'], ['#63151e', '#bd3d27'],
-    ['#732020', '#cd642c'], ['#945021', '#d3a64c'],
+    ['#722c2a', '#d85b2c'], ['#923526', '#ed7936'],
+    ['#a45327', '#f2ae4c'], ['#c1852d', '#f6cf70'],
   ];
   const supports = branchDefinitions.flatMap(branch => new THREE.CatmullRomCurve3(branch.p.map(vector)).getPoints(35));
   let leafCount = 0;
   crowns.forEach((crown, crownIndex) => {
-    const palette = crownPalette[Math.min(crown.shade, 2)], p = crown.p, [sx, sy, sz] = crown.size;
+    const palette = crownPalette[crown.shade], p = crown.p, [sx, sy, sz] = crown.size;
     const heart = new THREE.Vector3(p[0], p[1] - sy * .60, p[2]);
     const support = supports.reduce((nearest, point) => point.distanceToSquared(heart) < nearest.distanceToSquared(heart) ? point : nearest, supports[0]);
     const junction = support.clone().lerp(heart, .56).add(new THREE.Vector3(0, .18, 0));
@@ -211,7 +211,7 @@ export function addPaintedTree(scene, { position = [0, 0, 0], seed = 42719, scal
           const lift = .065 + random() * .063;
           const first = base.clone().lerp(end, .31).add(new THREE.Vector3(0, lift, 0));
           const second = base.clone().lerp(end, .75).add(new THREE.Vector3(0, lift * .42, 0));
-          const brightEdge = node > 2 && (bough + fan + crownIndex) % 9 === 0;
+          const brightEdge = node > 2 && (bough + fan + crownIndex) % 4 === 0;
           const shade = brightEdge ? crownPalette[3] : node < 2 ? crownPalette[0] : palette;
           const leaf = sweepVolume({ points: [base.toArray(), first.toArray(), second.toArray(), end.toArray()], width, depth: .022 + random() * .014, blade: true, crown: true, rows: 15, sides: 10, twist: spread * .13 + (random() - .5) * .38, phase: random() * TAU, colorA: shade[0], colorB: shade[1] });
           canopyParts.push(leaf.geometry); leafCount++;

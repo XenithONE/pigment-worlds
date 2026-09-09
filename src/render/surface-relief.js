@@ -17,9 +17,10 @@ function mirrored(value) {
 }
 function swipe(x, y) {
   x += Math.sin(y * 3.1 + Math.sin(y * .79)) * .038;
-  const u = mirrored(x) * (sourceSize - 1), v = mirrored(y) * (sourceSize - 1);
-  const x0 = Math.floor(u), y0 = Math.floor(v), x1 = Math.min(x0 + 1, sourceSize - 1), y1 = Math.min(y0 + 1, sourceSize - 1);
-  const tx = u - x0, ty = v - y0;
+  const u = mirrored(x) * sourceSize - .5, v = mirrored(y) * sourceSize - .5;
+  const ix = Math.floor(u), iy = Math.floor(v), tx = u - ix, ty = v - iy;
+  const clamp = n => Math.max(0, Math.min(sourceSize - 1, n));
+  const x0 = clamp(ix), y0 = clamp(iy), x1 = clamp(ix + 1), y1 = clamp(iy + 1);
   const a = heightField[y0 * sourceSize + x0] * (1 - tx) + heightField[y0 * sourceSize + x1] * tx;
   const b = heightField[y1 * sourceSize + x0] * (1 - tx) + heightField[y1 * sourceSize + x1] * tx;
   return a * (1 - ty) + b * ty;
@@ -28,22 +29,35 @@ function swipe(x, y) {
 // Focal rock shelves carry actual relief as well as the material's finer
 // bristles. This changes their silhouettes and sun/contact shadows in 3D.
 // Flora, distant terrain and architecture retain their own specialised LODs.
-export function applySculptedRelief(scene) {
+export function applySculptedRelief(scene, { richPigment = false } = {}) {
   prepareHeight();
   if (sourceSize < 2) return { dispose() {} };
   const originals = [], modifier = new TessellateModifier(.14, 3), pathModifier = new TessellateModifier(.075, 4), normal = new Vector3();
   scene.traverse(object => {
-    if (!object.isMesh || object.isInstancedMesh || !/painted-rock-bodies|stratified-paint-shelves|walkable-paint-ribbon|path-palette-knife-scoops|path-raised-brush-ridges|sculpted-canyon-topography/.test(object.name)) return;
+    const canyonFace = richPigment && /canyon-(near|far)-continuous-paint-face/.test(object.name);
+    if (!object.isMesh || object.isInstancedMesh || (!canyonFace && !/painted-rock-bodies|stratified-paint-shelves|walkable-paint-ribbon|path-palette-knife-scoops|path-raised-brush-ridges|sculpted-canyon-topography/.test(object.name))) return;
     const path = /walkable-paint-ribbon|path-palette-knife-scoops|path-raised-brush-ridges/.test(object.name);
-    const terrain=object.name==='sculpted-canyon-topography';
-    const original = object.geometry, geometry = terrain ? original.clone() : (path ? pathModifier : modifier).modify(original);
+    const terrain=object.name==='sculpted-canyon-topography', canyon=terrain||canyonFace;
+    const original = object.geometry, geometry = canyon ? original.clone() : (path ? pathModifier : modifier).modify(original);
     const positions = geometry.attributes.position, normals = geometry.attributes.normal;
+    // The painted coordinates belong to the substrate before any deposition.
+    // Retain them through welding so albedo and fine relief follow the same
+    // field as the displaced vertices, including the triplanar weights.
+    geometry.setAttribute('oilRestPosition', positions.clone());
+    geometry.setAttribute('oilRestNormal', normals.clone());
     for (let i = 0; i < positions.count; i++) {
       normal.fromBufferAttribute(normals, i).normalize();
       const x = positions.getX(i), y = positions.getY(i), z = positions.getZ(i);
       const wx = Math.abs(normal.x) ** 5, wy = Math.abs(normal.y) ** 5, wz = Math.abs(normal.z) ** 5;
-      const height = path ? swipe(x * .17, z * .17) : (swipe(z * .26, y * .19) * wx + swipe(x * .26, z * .26) * wy + swipe(x * .26, y * .19) * wz) / Math.max(.0001, wx + wy + wz);
-      const amount = path ? Math.max(0, height - .25) * .24 : (height - .48) * (terrain?.24:.19);
+      const scaleXZ = richPigment ? (path ? .32 : canyon ? .16 : .30) : path ? .17 : terrain ? .45 : .26;
+      const scaleY = richPigment ? (canyon ? .13 : .23) : terrain ? .32 : .19;
+      const height = path ? swipe(x * scaleXZ, z * scaleXZ) : (swipe(z * scaleXZ, y * scaleY) * wx + swipe(x * scaleXZ, z * scaleXZ) * wy + swipe(x * scaleXZ, y * scaleY) * wz) / Math.max(.0001, wx + wy + wz);
+      // A bank's upper and lower joins stay attached to their surrounding
+      // terrain; its middle carries deeper deposited paint geometry.
+      const u = canyonFace ? geometry.attributes.uv.getX(i) : .5;
+      const smoothEdge = t => { t = Math.max(0, Math.min(1, t / .1)); return t * t * (3 - 2 * t); };
+      const edge = canyonFace ? smoothEdge(u) * smoothEdge(1 - u) : 1;
+      const amount = path ? Math.max(0, height - .25) * (richPigment ? .15 : .24) : (height - .48) * (canyonFace ? .48 * edge : terrain ? .24 : .19);
       // All path layers share the same vertical paint field, preserving their
       // order while raising real pigment ridges above the walkable substrate.
       positions.setXYZ(i, x + (path ? 0 : normal.x * amount), y + (path ? amount : normal.y * amount), z + (path ? 0 : normal.z * amount));
