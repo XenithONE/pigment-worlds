@@ -20,7 +20,7 @@ test('the entrance lookout exposes the central river bend through actual terrain
       const target=new THREE.Vector3(canyonRiverX(z)+offset,canyonRiverLevel(z)+.13,z),direction=target.clone().sub(eye);
       ray.far=direction.length()-.15;ray.set(eye,direction.normalize());
       const hit=ray.intersectObjects(blockers,false)[0];
-      assert.equal(hit,undefined,`The river at ${target.toArray()} is hidden by ${hit?.object.name||'terrain'}.`);
+      assert.ok(!hit,`The river at ${target.toArray()} is hidden by ${hit?.object.name||'terrain'}.`);
     }
   } finally { canyon.dispose();geometry.dispose();material.dispose();scene.clear(); }
 });

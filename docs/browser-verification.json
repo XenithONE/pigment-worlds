@@ -1,6 +1,7 @@
 {
+  "version": 16,
   "date": "2026-09-10",
-  "scope": "Sculpted paint revision: closed 3D herbs, loaded red-gold crown and draped roots, open S-shaped canyon river, deeper deposited cliff geometry, classic pigment atlas with matched stochastic colour/height sampling and explicit texture gradients. Final desktop/mobile captures and keyboard and mouse-driven touch-layout controls. Garden captures precede the refreshed canyon portal thumbnail; it is checked on the public deployment.",
+  "scope": "Thicker rolled botanical blades with longitudinal brush relief; retained v15 knife-edge tree with deposited pigment-value shading; 43 short bank loads and three rounded river spills; smaller matched canyon paint field and refined upper near-bank grid; impasto sky with overhead cap projection. Classic pigment atlas retained. Desktop and emulated touch-layout captures use actual keyboard/mouse actions, including the journey, controls, and nine canyon directions/overlooks. Garden captures precede the refreshed canyon portal thumbnail; its public-deployment check is recorded separately.",
   "desktop": {
     "health": {
       "title": "PIGMENT — 絵の向こうへ",
@@ -25,15 +26,15 @@
         },
         "positionAfter": {
           "x": 0,
-          "z": 9.89616000000002,
+          "z": 9.871800000000004,
           "yaw": 0,
           "pitch": -0.015
         },
         "quality": "high",
         "pixelRatio": 1.25,
-        "triangles": 15731093,
+        "triangles": 16002821,
         "drawCalls": 513,
-        "frameMedian": 18.19999999999709,
+        "frameMedian": 18.099999999998545,
         "frameP95": 18.30000000000291
       },
       {
@@ -46,16 +47,16 @@
         },
         "positionAfter": {
           "x": 0,
-          "z": 9.900360000000022,
+          "z": 9.876420000000035,
           "yaw": 0,
           "pitch": -0.015
         },
         "quality": "high",
         "pixelRatio": 1.25,
-        "triangles": 13540365,
+        "triangles": 13571421,
         "drawCalls": 622,
-        "frameMedian": 18.19999999999709,
-        "frameP95": 36.10000000000582
+        "frameMedian": 18.10000000000582,
+        "frameP95": 18.40000000000873
       },
       {
         "world": 2,
@@ -66,17 +67,17 @@
           "pitch": 0.035
         },
         "positionAfter": {
-          "x": -3.9069320148665505,
-          "z": 9.924205967370453,
+          "x": -3.9081067608678968,
+          "z": 9.909552982287805,
           "yaw": 0.08,
           "pitch": 0.035
         },
         "quality": "high",
         "pixelRatio": 1.25,
-        "triangles": 5289945,
-        "drawCalls": 264,
-        "frameMedian": 18.199999999982538,
-        "frameP95": 18.29999999998836
+        "triangles": 5806093,
+        "drawCalls": 258,
+        "frameMedian": 18.099999999976717,
+        "frameP95": 18.300000000017462
       },
       {
         "world": 3,
@@ -88,13 +89,13 @@
         },
         "positionAfter": {
           "x": 0,
-          "z": 9.920940000000043,
+          "z": 9.93563999999992,
           "yaw": 0,
           "pitch": -0.015
         },
         "quality": "high",
         "pixelRatio": 1.25,
-        "triangles": 15410175,
+        "triangles": 15931383,
         "drawCalls": 497,
         "frameMedian": 18.199999999982538,
         "frameP95": 36.30000000001746
@@ -127,10 +128,10 @@
         },
         "quality": "auto",
         "pixelRatio": 1,
-        "triangles": 3542111,
+        "triangles": 3544199,
         "drawCalls": 210,
-        "frameMedian": 18.19999999999709,
-        "frameP95": 18.30000000000291
+        "frameMedian": 17.200000000004366,
+        "frameP95": 18.19999999999709
       },
       {
         "world": 1,
@@ -148,9 +149,9 @@
         },
         "quality": "auto",
         "pixelRatio": 1,
-        "triangles": 3669242,
+        "triangles": 3671498,
         "drawCalls": 219,
-        "frameMedian": 18.19999999999709,
+        "frameMedian": 18.10000000000582,
         "frameP95": 18.30000000000291
       },
       {
@@ -169,9 +170,9 @@
         },
         "quality": "auto",
         "pixelRatio": 1,
-        "triangles": 3126525,
-        "drawCalls": 171,
-        "frameMedian": 18.19999999999709,
+        "triangles": 3637449,
+        "drawCalls": 165,
+        "frameMedian": 18,
         "frameP95": 18.30000000000291
       },
       {
@@ -190,9 +191,9 @@
         },
         "quality": "auto",
         "pixelRatio": 1,
-        "triangles": 4413568,
+        "triangles": 4498504,
         "drawCalls": 169,
-        "frameMedian": 18.199999999982538,
+        "frameMedian": 18.099999999976717,
         "frameP95": 18.300000000017462
       }
     ]
@@ -203,8 +204,8 @@
       {
         "memory": "0-a",
         "position": {
-          "x": -3.8053375693623392,
-          "z": 5.045959330361162,
+          "x": -2.871037379380475,
+          "z": 5.864832620619527,
           "yaw": 0,
           "pitch": -0.015
         },
@@ -213,8 +214,8 @@
       {
         "memory": "0-b",
         "position": {
-          "x": -7.835664586030038,
-          "z": -7.822035217942318,
+          "x": -7.751167300599366,
+          "z": -7.737931856414567,
           "yaw": 0,
           "pitch": -0.015
         },
@@ -223,8 +224,8 @@
       {
         "memory": "0-c",
         "position": {
-          "x": 8.817607955404497,
-          "z": -20.751015271261267,
+          "x": 7.935728824511061,
+          "z": -20.012539003628135,
           "yaw": 0,
           "pitch": -0.015
         },
@@ -233,8 +234,8 @@
       {
         "memory": "1-a",
         "position": {
-          "x": 3.8130803886160294,
-          "z": 5.0176896113835,
+          "x": 3.990132855557569,
+          "z": 4.920148833963184,
           "yaw": 0,
           "pitch": -0.015
         },
@@ -243,8 +244,8 @@
       {
         "memory": "1-b",
         "position": {
-          "x": -6.862814027237433,
-          "z": -4.200394804469877,
+          "x": -7.00724158657847,
+          "z": -3.864486196090854,
           "yaw": 0,
           "pitch": -0.015
         },
@@ -253,8 +254,8 @@
       {
         "memory": "1-c",
         "position": {
-          "x": 6.785851333959055,
-          "z": -18.680432885979336,
+          "x": 6.667747166125942,
+          "z": -18.778187669108235,
           "yaw": 0,
           "pitch": -0.015
         },
@@ -263,8 +264,8 @@
       {
         "memory": "2-a",
         "position": {
-          "x": -5.153869046887792,
-          "z": 6.1524072540926795,
+          "x": -4.944762067590814,
+          "z": 6.086541799495114,
           "yaw": 0.08,
           "pitch": 0.035
         },
@@ -273,8 +274,8 @@
       {
         "memory": "2-b",
         "position": {
-          "x": 10.023605960694281,
-          "z": -1.9110962731221464,
+          "x": 9.832344317266013,
+          "z": -2.0833551259862624,
           "yaw": 0.08,
           "pitch": 0.035
         },
@@ -283,8 +284,8 @@
       {
         "memory": "2-c",
         "position": {
-          "x": -5.096544853002891,
-          "z": -16.753630390339836,
+          "x": -4.991611738653684,
+          "z": -16.74122124985625,
           "yaw": 0.08,
           "pitch": 0.035
         },
@@ -293,8 +294,8 @@
       {
         "memory": "3-a",
         "position": {
-          "x": -2.871553567330998,
-          "z": 5.145996432669429,
+          "x": -2.8937496491923835,
+          "z": 5.107010350808133,
           "yaw": 0,
           "pitch": -0.015
         },
@@ -303,8 +304,8 @@
       {
         "memory": "3-b",
         "position": {
-          "x": -6.8864634445012785,
-          "z": -6.9275316488914775,
+          "x": -6.8286503940717065,
+          "z": -6.927494839456019,
           "yaw": 0,
           "pitch": -0.015
         },
@@ -313,8 +314,8 @@
       {
         "memory": "3-c",
         "position": {
-          "x": 5.895898767940058,
-          "z": -19.709893861332844,
+          "x": 5.811760132046732,
+          "z": -19.5679053655745,
           "yaw": 0,
           "pitch": -0.015
         },
@@ -349,14 +350,14 @@
         },
         "moved": {
           "x": 0,
-          "z": 12.437580000000008,
-          "yaw": 0.40875999999999857,
+          "z": 12.371219999999996,
+          "yaw": 0.4010599999999984,
           "pitch": -0.015
         },
         "looked": {
           "x": 0,
-          "z": 12.437580000000008,
-          "yaw": 0.7497599999999985,
+          "z": 12.371219999999996,
+          "yaw": 0.7420599999999984,
           "pitch": -0.24900000000000005
         },
         "reset": {
@@ -368,18 +369,18 @@
         "modes": [
           {
             "mode": "low",
-            "drawCalls": 263,
-            "triangles": 4237622
+            "drawCalls": 257,
+            "triangles": 4748066
           },
           {
             "mode": "high",
-            "drawCalls": 280,
-            "triangles": 5373681
+            "drawCalls": 274,
+            "triangles": 5889949
           },
           {
             "mode": "auto",
-            "drawCalls": 281,
-            "triangles": 5081409
+            "drawCalls": 275,
+            "triangles": 5594077
           }
         ],
         "health": {
@@ -396,14 +397,14 @@
           "pitch": -0.015
         },
         "moved": {
-          "x": 0.8356112043786614,
-          "z": 10.877800513024356,
+          "x": 0.8415119187695892,
+          "z": 10.848691375057307,
           "yaw": -0.2,
           "pitch": -0.015
         },
         "looked": {
-          "x": 0.8356112043786614,
-          "z": 10.877800513024356,
+          "x": 0.8415119187695892,
+          "z": 10.848691375057307,
           "yaw": 0.017000000000000043,
           "pitch": -0.19700000000000004
         },
@@ -416,18 +417,18 @@
         "modes": [
           {
             "mode": "low",
-            "drawCalls": 154,
-            "triangles": 3126508
+            "drawCalls": 148,
+            "triangles": 3637432
           },
           {
             "mode": "high",
-            "drawCalls": 171,
-            "triangles": 3853121
+            "drawCalls": 165,
+            "triangles": 4369469
           },
           {
             "mode": "auto",
-            "drawCalls": 171,
-            "triangles": 3115115
+            "drawCalls": 165,
+            "triangles": 3626039
           }
         ],
         "health": {
@@ -448,57 +449,87 @@
           "yaw": 0.08,
           "pitch": 0.035
         },
-        "frameMedian": 18
+        "frameMedian": 18.19999999999709
       },
       {
-        "name": "river-overlook",
+        "name": "crown",
         "position": {
-          "x": -5.084552897874254,
-          "z": 14.500033081769095,
-          "yaw": 0.7499999877929688,
-          "pitch": -0.3999999633789063
-        },
-        "frameMedian": 18
-      },
-      {
-        "name": "tree-and-castle",
-        "position": {
-          "x": -5.084552897874254,
-          "z": 14.500033081769095,
-          "yaw": 0.37999992675781274,
-          "pitch": 0.3200000061035155
+          "x": -3.5,
+          "z": 15,
+          "yaw": 0.3799999267578124,
+          "pitch": 0.32000000610351564
         },
         "frameMedian": 18
       },
       {
         "name": "west",
         "position": {
-          "x": -5.084552897874254,
-          "z": 14.500033081769095,
-          "yaw": 1.5707963195800787,
-          "pitch": 5.4931640479372046e-8
+          "x": -3.5,
+          "z": 15,
+          "yaw": 1.5707963195800783,
+          "pitch": 5.49316406459055e-8
         },
-        "frameMedian": 18
+        "frameMedian": 18.10000000000582
       },
       {
         "name": "south",
         "position": {
-          "x": -5.084552897874254,
-          "z": 14.500033081769095,
-          "yaw": 3.141592657470705,
-          "pitch": 5.4931640479372046e-8
+          "x": -3.5,
+          "z": 15,
+          "yaw": 3.1415926574707047,
+          "pitch": 5.49316406459055e-8
         },
-        "frameMedian": 18
+        "frameMedian": 18.10000000000582
       },
       {
         "name": "east",
         "position": {
-          "x": -5.084552897874254,
-          "z": 14.500033081769095,
+          "x": -3.5,
+          "z": 15,
           "yaw": 4.712388995361332,
-          "pitch": 5.4931640479372046e-8
+          "pitch": 5.49316406459055e-8
         },
-        "frameMedian": 18
+        "frameMedian": 18.10000000000582
+      },
+      {
+        "name": "zenith",
+        "position": {
+          "x": -3.5,
+          "z": 15,
+          "yaw": -1.8310545191191352e-8,
+          "pitch": 1.05
+        },
+        "frameMedian": 18.10000000000582
+      },
+      {
+        "name": "middle-cascade",
+        "position": {
+          "x": -9.4306720993061,
+          "z": -3.9334577632053924,
+          "yaw": 0.6139999755859392,
+          "pitch": -0.3319999755859372
+        },
+        "frameMedian": 18.19999999999709
+      },
+      {
+        "name": "near-cascade",
+        "position": {
+          "x": -10.002289961472737,
+          "z": -0.04782205794971259,
+          "yaw": 1.6480000183105483,
+          "pitch": -0.8180000244140624
+        },
+        "frameMedian": 18.10000000000582
+      },
+      {
+        "name": "bank-deposits",
+        "position": {
+          "x": -10.002289961472737,
+          "z": -0.04782205794971259,
+          "yaw": 2.2999999877929707,
+          "pitch": -0.10000000305175788
+        },
+        "frameMedian": 18.10000000000582
       }
     ]
   }

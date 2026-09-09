@@ -61,8 +61,11 @@ function makeGrassBladeGeometry(rows = 12, sides = 8) {
     const t = row / rows, width = .075 * (.55 + .45 * Math.sin(Math.PI * t)) * (1 - t) ** .72 + .0005;
     for (let side = 0; side <= sides; side++) {
       const a = side / sides * TAU;
-      points.push(Math.cos(a) * width + .035 * Math.sin(t * 3.6), t - .5,
-        .14 * t * t + Math.sin(a) * (.010 * (1 - t) + .0005));
+      const across=Math.cos(a), swell=Math.sin(Math.PI*t);
+      const ridge=.012*Math.cos(across*6.2+.35*Math.sin(t*4))*swell;
+      const lip=.017*Math.exp(-(((across-.72)/.26)**2))*swell;
+      points.push(across * width * (1+.10*Math.sin(t*8+across)) + .035 * Math.sin(t * 3.6), t - .5,
+        .14 * t * t + Math.sin(a) * (.019 * (1 - t)**.55 + .0008) + ridge + lip);
       uvs.push(side / sides, t);
       if (row < rows && side < sides) { const k = row * (sides + 1) + side; indices.push(k, k + sides + 1, k + 1, k + 1, k + sides + 1, k + sides + 2); }
     }
@@ -78,10 +81,16 @@ function makeLeafGeometry() {
     const t = row / rows, r = Math.max(.006, Math.sin(Math.PI * t) ** .45);
     for (let s = 0; s <= sides; s++) {
       const a = s / sides * TAU, rib = 1 + .12 * Math.sin(a * 4 + .55 * Math.sin(t * 6)) * Math.sin(Math.PI * t);
-      const knifeEdge = .014 * Math.cos(a * 3 - .55 * Math.sin(t * 4)) * Math.sin(Math.PI * t);
-      points.push(Math.cos(a) * r * .21 * (1 + .09 * Math.cos(t * 8 + a)) * rib + .15 * Math.sin(Math.PI * t) + .14 * t * t, t - .5 - .25 * t ** 4, Math.sin(a) * r * .060 * rib + .34 * t * t + .045 * Math.sin(Math.PI * t) + knifeEdge); uv.push(s / sides, t);
+      const knifeEdge = .024 * Math.cos(a * 3 - .55 * Math.sin(t * 4)) * Math.sin(Math.PI * t);
+      points.push(Math.cos(a) * r * .21 * (1 + .09 * Math.cos(t * 8 + a)) * rib + .15 * Math.sin(Math.PI * t) + .14 * t * t, t - .5 - .25 * t ** 4, Math.sin(a) * r * .085 * rib + .34 * t * t + .045 * Math.sin(Math.PI * t) + knifeEdge); uv.push(s / sides, t);
       if (row < rows && s < sides) { const i = row * (sides + 1) + s; indices.push(i, i + sides + 1, i + 1, i + 1, i + sides + 1, i + sides + 2); }
     }
+  }
+  for(const top of [false,true]){
+    const ring=(top?rows:0)*(sides+1), centre=points.length/3;let x=0,y=0,z=0;
+    for(let s=0;s<sides;s++){const i=(ring+s)*3;x+=points[i];y+=points[i+1];z+=points[i+2];}
+    points.push(x/sides,y/sides,z/sides);uv.push(.5,top?1:0);
+    for(let s=0;s<sides;s++)indices.push(...(top?[centre,ring+s+1,ring+s]:[centre,ring+s,ring+s+1]));
   }
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(points, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.setIndex(indices); g.computeVertexNormals(); return g;
 }
@@ -111,7 +120,7 @@ function makePetalGeometry() {
 // enlarged coastal leaves look like folded paper on smaller screens.
 function makeCompactPaintGeometry(kind, veryLow = false) {
   const petal = kind === 'petal', width = petal ? .43 : kind === 'leaf' ? .21 : .47;
-  const depth = petal ? .105 : kind === 'leaf' ? .060 : .14, curve = .045;
+  const depth = petal ? .105 : kind === 'leaf' ? .085 : .14, curve = .045;
   const sides = veryLow ? 6 : 8, levels = veryLow ? [.18, .5, .82] : [.10, .26, .48, .71, .90];
   const sample = (t, a) => {
     const r = Math.sin(Math.PI * t) ** (petal ? .58 : kind === 'leaf' ? .45 : .62);
@@ -265,7 +274,24 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
     // painted horizon belongs at the equator, with the full sky above it.
     for (let i = 0; i < skyUV.count; i++) skyUV.setY(i, THREE.MathUtils.clamp((skyUV.getY(i) - .5) * 1.82 + .075, .005, .985));
     const panorama = skyTextures[id].clone(); panorama.wrapS = THREE.RepeatWrapping; panorama.repeat.x = 2; panorama.needsUpdate = true; textures.add(panorama);
-    const sky = mesh(skyGeometry, material(new THREE.MeshBasicMaterial({ map: panorama, side: THREE.BackSide, fog: false, depthWrite: false, toneMapped: false })));
+    const skyMaterial = material(new THREE.MeshBasicMaterial({ map: panorama, side: THREE.BackSide, fog: false, depthWrite: false, toneMapped: false }));
+    if (id === 2) {
+      // The sky-only painting has no polar cap. Project a calm brushed-blue
+      // area from above so its strokes do not converge into a pinhole overhead.
+      skyMaterial.onBeforeCompile = shader => {
+        shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vPaintSkyDirection;')
+          .replace('#include <begin_vertex>', '#include <begin_vertex>\nvPaintSkyDirection=normalize(position);');
+        shader.fragmentShader = shader.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vPaintSkyDirection;')
+          .replace('#include <map_fragment>', `
+            vec3 skyDirection=normalize(vPaintSkyDirection);
+            vec4 skyPaint=texture2D(map,vMapUv);
+            vec2 capUv=vec2(.50,.72)+skyDirection.xz*.40;
+            vec4 capPaint=texture2D(map,capUv);
+            diffuseColor*=mix(skyPaint,capPaint,smoothstep(.82,.97,skyDirection.y));`);
+      };
+      skyMaterial.customProgramCacheKey = () => 'painted-sky-brushed-cap-v1';
+    }
+    const sky = mesh(skyGeometry, skyMaterial);
     sky.position.y = 5; sky.rotation.y = -.48; sky.renderOrder = -10;
   }
   scene.add(new THREE.HemisphereLight(p.light, id === 0 ? '#40536f' : p.ground[1], id === 0 ? .65 : 1));
@@ -273,7 +299,7 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
   // Two broad opposing fills reveal the rounded sides of the pigment. A dark
   // underside should still read as blue paint, rather than a black paper cutout.
   const rim = new THREE.DirectionalLight('#ffe5b5', .24); rim.position.set(-18, 12, 22); scene.add(rim);
-  const blueFill = new THREE.DirectionalLight('#83baff', .22); blueFill.position.set(24, 9, 12); scene.add(blueFill);
+  const blueFill = new THREE.DirectionalLight('#83baff', id===2?.14:.22); blueFill.position.set(24, 9, 12); scene.add(blueFill);
 
   // Individual growth comes from shared root clusters, with dense drifts along
   // the path shoulders and quieter patches farther into each landscape.

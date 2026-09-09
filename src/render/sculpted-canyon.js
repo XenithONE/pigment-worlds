@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { makePouredPaintGeometry } from './poured-paint.js';
+import { makeCanyonCascade, makeCanyonBankLoad } from './canyon-paint-loads.js';
 
 const TAU = Math.PI * 2;
 const smooth = (a,b,x) => { const t=THREE.MathUtils.clamp((x-a)/(b-a),0,1); return t*t*(3-2*t); };
@@ -14,7 +14,7 @@ export const canyonEdge = z => canyonSpine(z)+.68*Math.sin(z*.31+.65*Math.sin(z*
   -.8*gauss((z-12)/3.8)+.62*gauss((z+7)/3.1);
 export const canyonRiverX = z => canyonSpine(z)-8.25-.7*Math.sin(z*.105+.4);
 const farEdge = z => canyonRiverX(z)-8.35+.75*Math.sin(z*.22+1.7)+1.2*gauss((z+10)/6);
-export const canyonRiverLevel = z => .3+3.1*smooth(-2,2,-z)+3.3*smooth(18,22,-z)+2.0*smooth(68,74,-z);
+export const canyonRiverLevel = z => .3+3.1*smooth(-.55,.55,-z)+3.3*smooth(19.45,20.55,-z)+2.0*smooth(70.4,71.6,-z);
 export const canyonRiverContains = (x,z) => x>farEdge(z)+.2 && x<canyonEdge(z)-.25 && z<72;
 export function canyonHeight(x,z) {
   // A gently descending lookout exposes the water below the approach. All
@@ -61,9 +61,11 @@ export function addSculptedCanyon(scene) {
   flowMat.customProgramCacheKey=()=> 'canyon-flow-bristles-v1';
   const put=(g,m,name)=>{geometries.add(g);g.computeVertexNormals();const mesh=new THREE.Mesh(g,m);mesh.name=name;mesh.castShadow=true;mesh.receiveShadow=true;group.add(mesh);return mesh;};
   const surface=(cols,rows,sample,shade,mat,name,flip=false)=>{
+    const columnSteps=Array.isArray(cols)?cols:null,rowSteps=Array.isArray(rows)?rows:null;
+    if(columnSteps)cols=columnSteps.length-1;if(rowSteps)rows=rowSteps.length-1;
     const pos=[],uv=[],colors=[],ix=[],c=new THREE.Color();
     for(let i=0;i<=rows;i++)for(let j=0;j<=cols;j++){
-      const u=j/cols,t=i/rows,p=sample(u,t);pos.push(...p);uv.push(u,t);shade(c,u,t,p);colors.push(c.r,c.g,c.b);
+      const u=columnSteps?columnSteps[j]:j/cols,t=rowSteps?rowSteps[i]:i/rows,p=sample(u,t);pos.push(...p);uv.push(u,t);shade(c,u,t,p);colors.push(c.r,c.g,c.b);
       if(i<rows&&j<cols){const a=i*(cols+1)+j,b=a+cols+1;ix.push(...(flip?[a,a+1,b,a+1,b+1,b]:[a,b,a+1,a+1,b,b+1]));}
     }
     const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));g.setIndex(ix);return put(g,mat,name);
@@ -77,7 +79,15 @@ export function addSculptedCanyon(scene) {
   // Broad masses overlap inside one continuous surface: swelling upper folds,
   // longer lower drags and recessed seams share their surface and silhouette.
   // The top and submerged foot remain attached to the same terrain field.
-  for(const bank of ['near','far']) surface(68,800,(u,t)=>{
+  // One structured grid keeps every shared edge connected. Its denser bands
+  // retain every old sample and its actual UV; no independent refined patches
+  // can open a crack after the material displaces their common boundaries.
+  const refinedAxis=(count,subdivisions)=>{
+    const steps=[];for(let i=0;i<count;i++){const divisions=subdivisions((i+.5)/count);for(let j=0;j<divisions;j++)steps.push((i+j/divisions)/count);}steps.push(1);return steps;
+  };
+  const nearColumns=refinedAxis(68,u=>u<.45?4:u<.5?2:1);
+  const nearRows=refinedAxis(800,t=>{const z=72-t*200;return z>=-20&&z<=15?4:z>=-22&&z<=17?2:1;});
+  for(const bank of ['near','far']) surface(bank==='near'?nearColumns:68,bank==='near'?nearRows:800,(u,t)=>{
     const near=bank==='near',z=72-t*200,edge=near?canyonEdge(z):farEdge(z);
     const sign=near?-1:1,start=edge-sign*(near?1.65:3.15),end=edge+sign*2.13;
     // Begin inside the level shelf instead of on a grid-interpolated ramp.
@@ -87,15 +97,17 @@ export function addSculptedCanyon(scene) {
     const shoulder=Math.max(0,Math.sin(phase+u*1.7))**3;
     const lower=Math.max(0,Math.cos(phase*.73-u*3.2+.7))**4;
     const tucked=.24*(.5+.5*Math.sin(z*1.17+u*3.1))**8;
-    const swelling=(.43+1.36*shoulder+.52*lower-tucked)*envelope**1.15;
+    const piled=.57*Math.sin(u*TAU*1.7+phase*.38)**4;
+    const swelling=(.43+1.36*shoulder+.52*lower+piled-tucked)*envelope**1.15;
     const dragged=.12*Math.sin(z*1.31+u*2.8)+.033*Math.sin(z*5.8+u*6);
     const x=THREE.MathUtils.lerp(start,end,u)+sign*(swelling+dragged*envelope);
     const fold=.055*Math.sin(phase+u*6.4)*envelope;
-    const descent=smooth(.13,1,THREE.MathUtils.clamp(u+fold,0,1));
+    const baseDescent=smooth(.13,1,THREE.MathUtils.clamp(u+fold,0,1));
+    const descent=baseDescent+.055*Math.sin(baseDescent*TAU*1.7+phase*.31)*envelope;
     const y=top*(1-descent)+bottom*descent+.42*shoulder*envelope*(1-u);
     return [x,y,z];
   },cliffColor,cliffMat,`canyon-${bank}-continuous-paint-face`,bank==='far');
-  surface(96,900,(u,t)=>{
+  const riverMesh=surface(96,900,(u,t)=>{
     const z=74-t*207,x=THREE.MathUtils.lerp(farEdge(z)+.18,canyonEdge(z)-.32,u);
     const pool=.09*gauss((z+25)/13)*Math.sin(u*TAU+z*.11)+.075*gauss((z+59)/11)*Math.sin(u*TAU-z*.14);
     const flow=u+.038*Math.sin(z*.16+u*6)+pool;
@@ -107,24 +119,36 @@ export function addSculptedCanyon(scene) {
     const strip=Math.floor(wave),f=wave-strip;
     c.copy(palette[[1,0,2,1,4,5,0,1,2][((strip%9)+9)%9]]).lerp(palette[[0,2,1,4,5,0,1,2,1][((strip%9)+9)%9]],smooth(.78,1,f));
     c.multiplyScalar(.87+.17*Math.sin(u*175+Math.sin(p[2]*.2)*4)**2);
-  },flowMat,'continuous-viscous-canyon-river',true).castShadow=false;
+  },flowMat,'continuous-viscous-canyon-river',true);
+  const riverParts=[riverMesh.geometry];
+  for(const [index,z] of [0,-20,-71].entries())riverParts.push(makeCanyonCascade({z,upper:canyonRiverLevel(z-2),lower:canyonRiverLevel(z+2),bounds:zz=>[farEdge(zz)+.18,canyonEdge(zz)-.32],seed:71+index*13}));
+  const riverGeometry=mergeGeometries(riverParts,false);
+  geometries.delete(riverMesh.geometry);riverParts.forEach(geometry=>geometry.dispose());geometries.add(riverGeometry);riverMesh.geometry=riverGeometry;
+  riverMesh.castShadow=true;riverMesh.userData.cascadeCount=3;
 
-  const pours=palette.map((color,i)=>physical(color,'canyon',{roughness:i%3===0?.36:.44})),buckets=pours.map(()=>[]);
-  // Wide paint sheets fuse the high terraces to the river, with uneven pooled ends.
-  for(let k=0;k<26;k++){
-    const z=25-k*4.9,far=k%3!==0,edge=far?farEdge(z):canyonEdge(z);
-    const y=canyonHeight(edge+(far?-1.65:1.65),z),h=y-canyonRiverLevel(z)-.16;
-    if(h<1.4)continue;
-    const g=makePouredPaintGeometry(1.2+(k%4)*.41,h*.93,613+k*147);
-    g.scale(1,1,2.7);g.rotateY(far?Math.PI/2:-Math.PI/2);g.translate(edge+(far?-1.0:.47),y+.04,z);buckets[(k*3+4)%7].push(g);
-  }
-  // Small connected ridges beside the walking surface give the foreground a
-  // tangible wet edge. They follow the terrain instead of hovering over it.
-  for(let k=0;k<78;k++){
-    const z=28-k*.76,x=canyonEdge(z)+1.8;
-    const pts=[];for(let j=0;j<=9;j++){const zz=z-j*.11,xx=x+.12*Math.sin(j*.4+k);pts.push(new THREE.Vector3(xx,canyonHeight(xx,zz)+.06+.025*Math.sin(j*.5),zz));}
-    const g=new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),12,.045+.012*(k%3),7,false);buckets[k%7].push(g);
-  }
-  for(let i=0;i<buckets.length;i++)if(buckets[i].length){const g=mergeGeometries(buckets[i],false);buckets[i].forEach(x=>x.dispose());put(g,pours[i],'canyon-heavy-pigment-pours');}
+  // Irregular, connected masses replace the repeated narrow drips. Their
+  // colour is authored per load; the deposit material keeps those colours
+  // while adding only the small-scale paint normal shared with other objects.
+  const depositMat=physical('#ffffff','deposit',{vertexColors:true,roughness:.38,clearcoat:.6,clearcoatRoughness:.17});
+  const depositColors=[['#103b50','#4b91a0'],['#3b4326','#93935a'],['#79291e','#d56432'],['#a97128','#e4bd65'],['#183844','#557969'],['#513321','#b57632']];
+  const deposits=[];
+  const banks=[{bank:'near',zs:[12.5,7.8,2.5,-3.7,-10.2,-15.9,-28.3,-42,-57],widths:[5.0,3.9,4.2,5.1,4.5,5.3,6.1,5.6,6.2]},
+    {bank:'far',zs:[20.4,8.6,-3.5,-15,-27.2,-41.7,-58.5,-75.4,-92],widths:[6.7,7.9,5.4,6.6,8.3,5.8,7.3,6.1,8.4]}];
+  for(const {bank,zs,widths} of banks)zs.forEach((z,index)=>{
+    // Leave the lowered inner bend open: a crest here would cross the view
+    // from the entrance through the broad middle reach of the river.
+    if(bank==='near'&&index===6)return;
+    const edge=bank==='near'?canyonEdge:farEdge,colors=depositColors[(index+(bank==='far'?2:0))%depositColors.length];
+    const options={z,width:widths[index],bank,edge,height:canyonHeight,riverLevel:canyonRiverLevel,seed:37+index*11+(bank==='far'?103:0)};
+    const topFraction=bank==='near'&&(index===2||index===3)?.82:1;
+    deposits.push(makeCanyonBankLoad({...options,z:z-widths[index]*.17,width:widths[index]*.61,fraction:topFraction,colorA:colors[0],colorB:colors[1]}));
+    const lowerColor=depositColors[(index+3)%depositColors.length];
+    deposits.push(makeCanyonBankLoad({...options,z:z+widths[index]*.19,width:widths[index]*.53,fraction:topFraction-.20-.06*Math.sin(index*1.7)**2,seed:options.seed+5,colorA:lowerColor[0],colorB:lowerColor[1]}));
+    if(index%2===0){const accent=depositColors[(index+1)%depositColors.length];deposits.push(makeCanyonBankLoad({...options,z:z+.23,width:widths[index]*.36,fraction:topFraction-.085,seed:options.seed+17,colorA:accent[0],colorB:accent[1]}));}
+  });
+  const depositedGeometry=mergeGeometries(deposits,false);deposits.forEach(geometry=>geometry.dispose());const deposited=put(depositedGeometry,depositMat,'canyon-piled-pigment-deposits');
+  deposited.userData.pigmentSurface='deposit';deposited.userData.closedPaintLoads=deposits.length;
+  group.userData.pouredCascades=3;group.userData.closedBankLoads=deposits.length;
+  group.userData.nearBankGrid={columns:nearColumns.length-1,rows:nearRows.length-1};
   return {group,dispose(){group.removeFromParent();geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());}};
 }

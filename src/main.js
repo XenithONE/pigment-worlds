@@ -100,13 +100,13 @@ function setWorld(id){
   world.memoryMeshes.forEach(group=>group.traverse(object=>{object.castShadow=false;}));
   world.oil=applyOilMaterials(world.scene,{richPigment,stochasticPigment});
   world.scene.environment=environmentMaps[id].texture;
-  world.scene.environmentIntensity=id===0?.22:.18;
+  world.scene.environmentIntensity=id===0?.22:id===2?.16:.18;
   // A low, warm key skims the raised paint; restrained sky fill leaves cool
   // coloured cavities between the swipes instead of bleaching every surface.
   const paintKey=world.scene.getObjectByName('paint-sun');
-  const keyPositions=[[-24,26,-14],[-28,24,-14],[-28,38,26],[-38,20,-28]];
-  paintKey.position.set(...keyPositions[id]);paintKey.intensity=[3.6,3.5,3.7,3.5][id];
-  world.scene.children.filter(object=>object.isHemisphereLight).forEach(light=>{light.intensity=[.60,.52,.72,.52][id];});
+  const keyPositions=[[-24,26,-14],[-28,24,-14],[-28,32,-12],[-38,20,-28]];
+  paintKey.position.set(...keyPositions[id]);paintKey.intensity=[3.6,3.5,3.1,3.5][id];
+  world.scene.children.filter(object=>object.isHemisphereLight).forEach(light=>{light.intensity=[.60,.52,.55,.52][id];});
   configurePaintShadows(renderer,world.scene,runtime.quality);
   world.setDetailLevel?.(runtime.quality==='auto'&&touchDevice()?'low':runtime.quality);
   world.scene.traverse(object=>object.userData.paintLiquid?.setReflectionEnabled(runtime.quality!=='low'&&(!touchDevice()||runtime.quality==='high')));
@@ -260,7 +260,7 @@ async function boot(){
     resize();
     let loaded=0;
     const loader=new THREE.TextureLoader();
-    skyTextures=await Promise.all(WORLD_INFO.map(async info=>{const texture=await loader.loadAsync(`${import.meta.env.BASE_URL}art/${info.sky}.webp`);texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());$('#loading-status').textContent=`${++loaded} / 4 の世界に、色が入りました`;return texture;}));
+    skyTextures=await Promise.all(WORLD_INFO.map(async (info,id)=>{const skyFile=id===2?'golden-impasto-sky-v16':info.sky;const texture=await loader.loadAsync(`${import.meta.env.BASE_URL}art/${skyFile}.webp`);texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());$('#loading-status').textContent=`${++loaded} / 4 の世界に、色が入りました`;return texture;}));
     portalTextures=await Promise.all(WORLD_INFO.map(async info=>{const texture=await loader.loadAsync(`${import.meta.env.BASE_URL}art/${info.sky.replace('-sky','-portal')}.webp`);texture.colorSpace=THREE.SRGBColorSpace;return texture;}));
     const pmrem=new THREE.PMREMGenerator(renderer);environmentMaps=skyTextures.map(texture=>pmrem.fromEquirectangular(texture));pmrem.dispose();
     $('#loading-status').textContent='厚い絵具に、光を入れています';

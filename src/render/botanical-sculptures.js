@@ -27,11 +27,12 @@ function foldedBlade({ center, width, thickness, rows = 24, sides = 12, twist = 
     const envelope = Math.sin(Math.PI * t), profile = Math.max(.002, envelope ** (petal ? .42 : .50)) * (petal ? .67 + t * .52 : .90 - t * .20);
     for (let side = 0; side <= sides; side++) {
       const a = side / sides * TAU, u = Math.cos(a), face = Math.sin(a);
-      const asymmetry = 1 + .11 * Math.sin(t * 5.1 + phase + u * .7) + .045 * Math.cos(t * 11 + u * 2);
+      const asymmetry = 1 + .17 * Math.sin(t * 5.1 + phase + u * .7) + .09 * Math.cos(t * 11 + u * 2);
       const x = u * width * profile * asymmetry;
-      const dragged = Math.cos(u * Math.PI * 2.3 + .37 * Math.sin(t * 4 + phase)) * fold * envelope;
-      const rolledEdge = Math.exp(-(((u - .78) / .24) ** 2)) * fold * 2.7 * envelope;
-      const z = face * thickness * profile + dragged + rolledEdge;
+      const dragged = Math.cos(u * Math.PI * 2.3 + .37 * Math.sin(t * 4 + phase)) * fold * 1.65 * envelope;
+      const rolledEdge = Math.exp(-(((u - .73) / .27) ** 2)) * fold * 3.1 * envelope;
+      const loadedEnd = Math.exp(-(((t - .76) / .18) ** 2));
+      const z = Math.sign(face) * Math.abs(face) ** .74 * thickness * profile * (1.55 + loadedEnd * .55) + dragged + rolledEdge;
       const point = c.clone().addScaledVector(b, x).addScaledVector(n, z);
       positions.push(point.x, point.y, point.z); uvs.push(side / sides, t);
       if (row < rows && side < sides) { const i = row * stride + side; indices.push(i, i + stride, i + 1, i + 1, i + stride, i + stride + 1); }
@@ -80,7 +81,8 @@ function plantBuilder() {
       for (let i = 0; i < geometry.attributes.position.count; i++) {
         const t = uv?.getY(i) ?? .5, u = uv?.getX(i) ?? .5;
         color.copy(low).lerp(high, clamp(t * .86 + .05, 0, 1));
-        color.multiplyScalar(.95 + .07 * Math.sin(t * 5.3 + u * 2.1)); colors.push(color.r, color.g, color.b);
+        const across = Math.cos(u * TAU), ridge = .5 + .5 * Math.cos(across * Math.PI * 2.3 + .37 * Math.sin(t * 4));
+        color.multiplyScalar(.72 + .30 * ridge + .10 * Math.sin(t * 5.3 + across * 2.1)); colors.push(color.r, color.g, color.b);
       }
       geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
       quaternion.setFromEuler(new THREE.Euler(...rotation)); matrix.compose(v3(position), quaternion, v3(scale));
@@ -217,7 +219,7 @@ export function addBotanicalSculptures(scene, { id = 0, baseHeight, pathX, isPon
   for (const [key, { variant, plants }] of batches) {
     const mesh = new THREE.InstancedMesh(levels[variant][0], material, plants.length);
     mesh.name = `botanical-${variant < 3 ? 'iris' : 'golden'}-flowers:${key}`;
-    mesh.userData.pigmentSurface = 'foliage'; mesh.userData.botanicalSculpture = true;
+    mesh.userData.pigmentSurface = 'foliage'; mesh.userData.botanicalSculpture = true; mesh.userData.pigmentBladeUV = true;
     mesh.castShadow = true; mesh.receiveShadow = true;
     plants.forEach((plant, index) => {
       dummy.position.set(plant.x, plant.y, plant.z); dummy.rotation.set(plant.lean, plant.yaw, -plant.lean * .6); dummy.scale.set(plant.scale, plant.heightScale, plant.scale); dummy.updateMatrix(); mesh.setMatrixAt(index, dummy.matrix);

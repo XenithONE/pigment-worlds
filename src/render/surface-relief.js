@@ -58,8 +58,8 @@ export function applySculptedRelief(scene, { richPigment = false, stochasticPigm
       normal.fromBufferAttribute(normals, i).normalize();
       const x = positions.getX(i), y = positions.getY(i), z = positions.getZ(i);
       const wx = Math.abs(normal.x) ** 5, wy = Math.abs(normal.y) ** 5, wz = Math.abs(normal.z) ** 5;
-      const scaleXZ = richPigment ? (path ? .32 : canyon ? .095 : .30) : path ? .17 : terrain ? .45 : .26;
-      const scaleY = richPigment ? (canyon ? .085 : .23) : terrain ? .32 : .19;
+      const scaleXZ = richPigment ? (path ? .32 : canyon ? .14 : .30) : path ? .17 : terrain ? .45 : .26;
+      const scaleY = richPigment ? (canyon ? .125 : .23) : terrain ? .32 : .19;
       const height = path ? swipe(x * scaleXZ, z * scaleXZ, stochasticPigment) : (swipe(z * scaleXZ, y * scaleY, stochasticPigment) * wx + swipe(x * scaleXZ, z * scaleXZ, stochasticPigment) * wy + swipe(x * scaleXZ, y * scaleY, stochasticPigment) * wz) / Math.max(.0001, wx + wy + wz);
       // A bank's upper and lower joins stay attached to their surrounding
       // terrain; its middle carries deeper deposited paint geometry.
@@ -67,7 +67,7 @@ export function applySculptedRelief(scene, { richPigment = false, stochasticPigm
       const smoothEdge = t => { t = Math.max(0, Math.min(1, t / .1)); return t * t * (3 - 2 * t); };
       const edge = canyonFace ? smoothEdge(u) * smoothEdge(1 - u) : 1;
       const amount = path ? Math.max(0, height - .25) * (richPigment ? .15 : .24)
-        : canyonFace ? Math.max(0,height-.18)*2.0*edge : (height-.48)*(terrain?.55:.19);
+        : canyonFace ? Math.max(0,height-.18)*1.45*edge : (height-.48)*(terrain?.55:.19);
       // All path layers share the same vertical paint field, preserving their
       // order while raising real pigment ridges above the walkable substrate.
       positions.setXYZ(i, x + (path ? 0 : normal.x * amount), y + (path ? amount : normal.y * amount), z + (path ? 0 : normal.z * amount));

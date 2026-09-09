@@ -1,11 +1,24 @@
 # Pigment and canyon material revisions
 
-v15 adopts the existing pigment/relief atlas with stronger physical canyon
-relief, shared stochastic coordinates and corrected texture filtering. The
-final paired visual comparison favoured this combination over the newly
-generated loaded-paint atlas. Final browser, controls and directional-view
-checks are complete; results and limits are recorded in
-[verification](../docs/verification.md). Publication is recorded separately.
+v16 builds on the retained pigment/relief atlas with thicker botanical forms,
+paint-colour variation on deposited loads, shorter layered banks and poured
+river steps. The canyon sky now carries broad painted clouds and a projected
+overhead cap. Current checks and limits are recorded in
+[verification](../docs/verification.md); publication is recorded separately.
+
+## v16 — deposited colour and closer views
+
+- Petal and leaf cross sections have more body, asymmetric folds and rolled edges. The blade's periodic UV coordinate carries broad longitudinal brush relief. Fine, densely sparkling blade shading was rejected in the first scene comparison.
+- Crown and bank-deposit materials preserve their authored colours and vary pigment value along the matched broad brush field. A bounded gain prevents a white diffuse wash. Applying this transfer to all canyon surfaces erased their multicolour brush strands and was rejected; those surfaces retain the atlas blend, with darker authored pigments weighted more strongly.
+- Canyon colour, shader relief and physical displacement share the smaller spatial scales 0.14 horizontally and 0.125 vertically. Shader depth is 0.12; the cliff displacement multiplier is 1.45, with the existing edge fade. These paired changes reduce stroke size while keeping approximate slope magnitudes near the preceding version.
+- The upper near bank uses a single structured 164 × 1236 grid, with samples concentrated around close walking views. Coarse displaced triangles, rather than terrain overlap, caused the sharp foreground spikes found in the first close views. The local refinement retains the original sample positions and joins; the far bank keeps its earlier grid. This adds approximately 297,000 triangles to the canyon geometry.
+- The river has three closed, rounded spill forms. Forty-three short, uneven bank deposits replace the first trial's long curtain-like loads. The spill forms sit 4 cm above the original river surface to avoid the intersections found in a local CPU inspection.
+- The original v15 tree geometry is retained. Connected height-field crowns produced spikes and curtains; a subsequent union of 240 curved loads removed those artifacts but looked too much like rounded candy or cauliflower in the full scene. Those tree geometry trials were rejected. Stronger deposited-colour shading remains on the retained knife-edge crown.
+- The new [sky image and exact prompt](sky-v16-prompts.md) are retained. A top projection blends into the panorama to remove the overhead pinhole seen in the initial spherical mapping. The distant castle/mountain painting is unchanged.
+
+The changes are visual modelling and shading, not a simulation of wet paint.
+Near-view geometry and browser evidence must be checked alongside the entry
+composition; CPU topology alone does not establish reference-level appearance.
 
 ## v14 — adopted baseline
 

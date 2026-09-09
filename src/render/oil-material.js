@@ -9,6 +9,9 @@ export { loadOilPaintTexture } from './paint-texture.js';
 const pigmentFunctions = /* glsl */`
 varying vec3 vOilPosition;
 varying vec3 vOilRestNormal;
+#ifdef USE_OIL_BLADE_UV
+  varying vec2 vOilBladeUv;
+#endif
 uniform sampler2D uOilPaint;
 uniform sampler2D uOilPigmentAtlas;
 uniform float uOilPaintReady;
@@ -73,7 +76,8 @@ const profiles = {
   rock:         { scale: [.26, .19, .26], depth: .095, pigment: .62, color: [.43, .34, .38], fold: .70, roughness: .40, coat: .62, glaze: .16 },
   bark:         { scale: [.62, .16, .62], depth: .060, pigment: .14, color: [.04, .035, .18], fold: .40, roughness: .47, coat: .36 },
   foliage:      { scale: [1.00, .50, 1.00], depth: .015, pigment: .08, color: [.025, .025, .10], fold: .22, roughness: .40, coat: .42 },
-  crown:        { scale: [.80, .65, .80], depth: .040, pigment: 0, color: [0, 0, .035], fold: 0, roughness: .34, coat: .55, glaze: .20 },
+  crown:        { scale: [.80, .65, .80], depth: .040, pigment: 0, color: [0, 0, .035], fold: 0, roughness: .34, coat: .55, glaze: .20, loadRange: [.58, 1.40], atlasResidue: 0 },
+  deposit:      { scale: [.42, .23, .42], depth: .035, pigment: 0, color: [0, 0, .04], fold: 0, roughness: .38, coat: .60, glaze: .17, loadRange: [.58, 1.40], atlasResidue: 0 },
   gold:         { scale: [.60, .42, .60], depth: .016, pigment: .06, color: [.018, .012, .10], fold: .15, roughness: .38, coat: .32 },
   architecture: { scale: [.32, .28, .32], depth: .042, pigment: .08, color: [.035, .025, .12], fold: .22, roughness: .49, coat: .30 },
   water:        { scale: [.15, .12, .15], depth: .055, pigment: .15, color: [.08, .05, .16], fold: .20, roughness: .28, coat: .64 },
@@ -109,7 +113,7 @@ function averageCanvasPigment(material) {
 
 const richProfiles = {
   ground: { scale: [.34, .28, .34], direct: .60, depth: .052, roughness: .40, coat: .52 },
-  canyon: { scale: [.095, .085, .095], direct: .72, depth: .17, roughness: .40, coat: .55 },
+  canyon: { scale: [.14, .125, .14], direct: .72, depth: .12, roughness: .48, coat: .55 },
   path: { scale: [.32, .32, .32], direct: .85, depth: .065, roughness: .35, coat: .64 },
   rock: { scale: [.30, .23, .30], direct: .75, depth: .095, roughness: .37, coat: .62 },
 };
@@ -127,14 +131,16 @@ export function applyOilMaterials(scene, { richPigment = false, stochasticPigmen
       const profile = { ...profiles[surface], ...(richPigment ? richProfiles[surface] : {}) };
       const moving = surface === 'foliage' && /grass|flower|foliage|tree-pigment|canopy|willow/i.test(object.name);
       const anchored = Boolean(object.geometry?.attributes.oilRestPosition && object.geometry?.attributes.oilRestNormal);
+      const blade = surface === 'foliage' && Boolean(object.userData.pigmentBladeUV);
       if (!coatings.has(original)) coatings.set(original, new Map());
-      const variants = coatings.get(original), key = `${surface}:${moving}:${anchored}`;
+      const variants = coatings.get(original), key = `${surface}:${moving}:${anchored}:${blade}`;
       if (variants.has(key)) return variants.get(key);
       const material = new MeshPhysicalMaterial();
       MeshStandardMaterial.prototype.copy.call(material, original);
       material.defines = { STANDARD: '', PHYSICAL: '' };
       if(stochasticPigment) material.defines.OIL_PATCH_MAPPING = '';
       if(anchored) material.defines.USE_OIL_REST = '';
+      if(blade) material.defines.USE_OIL_BLADE_UV = '';
       material.name = `${original.name || surface} / viscous oil`;
       material.userData = { ...original.userData, pigmentSurface: surface };
       // The old CanvasTexture repeated like linen. Preserve its palette as
@@ -143,9 +149,9 @@ export function applyOilMaterials(scene, { richPigment = false, stochasticPigmen
       if (palette) { material.color.multiply(palette); material.map = null; }
       material.bumpMap = null;
       material.normalMap = null;
-      material.roughness = profile.roughness;
-      material.clearcoat = profile.coat;
-      material.clearcoatRoughness = profile.glaze ?? .27;
+      material.roughness = blade ? .36 : profile.roughness;
+      material.clearcoat = blade ? .58 : profile.coat;
+      material.clearcoatRoughness = blade ? .22 : profile.glaze ?? .27;
       material.ior = 1.47;
       material.specularIntensity = .90;
       material.onBeforeCompile = shader => {
@@ -163,6 +169,9 @@ export function applyOilMaterials(scene, { richPigment = false, stochasticPigmen
         shader.vertexShader = shader.vertexShader.replace('#include <common>', `#include <common>
           varying vec3 vOilPosition;
           varying vec3 vOilRestNormal;
+          #ifdef USE_OIL_BLADE_UV
+            varying vec2 vOilBladeUv;
+          #endif
           #ifdef USE_OIL_REST
             attribute vec3 oilRestPosition;
             attribute vec3 oilRestNormal;
@@ -171,6 +180,9 @@ export function applyOilMaterials(scene, { richPigment = false, stochasticPigmen
         shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
           vOilPosition = position;
           vOilRestNormal = normal;
+          #ifdef USE_OIL_BLADE_UV
+            vOilBladeUv = uv;
+          #endif
           #ifdef USE_OIL_REST
             vOilPosition = oilRestPosition;
             vOilRestNormal = oilRestNormal;
@@ -187,8 +199,19 @@ export function applyOilMaterials(scene, { richPigment = false, stochasticPigmen
             transformed.z += cos(uOilTime * .29 + oilPhase) * oilTip * .022;` : ''}`);
         shader.fragmentShader = shader.fragmentShader.replace('#include <common>', `#include <common>\n${pigmentFunctions}`);
         shader.fragmentShader = shader.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
+          vec3 authoredLoad = diffuseColor.rgb;
           vec3 paintedColor;
           vec4 oil = oilSurface(vOilPosition * uOilScale, normalize(vOilRestNormal), paintedColor);
+          #ifdef USE_OIL_BLADE_UV
+            // One continuous brush direction follows each deposited blade.
+            // Cosine wraps both faces without a discontinuity at the UV seam.
+            vec3 bladeColor;
+            vec4 bladePaint = oilSwipe(vec2(cos(vOilBladeUv.x * 6.283185307) * .24, vOilBladeUv.y * .18), bladeColor);
+            // Broad dragged ridges carry the blade. Suppress the fine guide's
+            // pinprick highlights when it is stretched over a small flower.
+            oil.x = mix(oil.x, bladePaint.y, .50);
+            oil.y = mix(oil.y, bladePaint.y, .35);
+          #endif
           vec3 pigmentMix = mix(vec3(.78, .93, 1.19), vec3(1.21, 1.02, .76), oil.w);
           diffuseColor.rgb *= mix(vec3(1.), pigmentMix, uOilPigment);
           // A swipe picks up the ochre/cool underpainting at its lifted edge.
@@ -219,7 +242,16 @@ export function applyOilMaterials(scene, { richPigment = false, stochasticPigmen
           diffuseColor.rgb *= 1. - oil.z * .065;
           // Keep the artist's actual pigment values in broad paint deposits.
           // The physical relief still supplies view-dependent light and shadow.
-          diffuseColor.rgb = mix(diffuseColor.rgb, paintedColor, uOilDirectPigment * uOilPaintReady);`);
+          ${profile.loadRange ? `// Each deposited load keeps its authored pigment. The matched height
+          // field changes its value without painting every surface ivory-blue.
+          float loadStroke = smoothstep(.24, .64, oil.y);
+          float loadGain = mix(${profile.loadRange[0].toFixed(2)}, ${profile.loadRange[1].toFixed(2)}, loadStroke);
+          float loadPeak = max(authoredLoad.r, max(authoredLoad.g, authoredLoad.b));
+          vec3 depositedLoad = authoredLoad * min(loadGain, .94 / max(.001, loadPeak));
+          diffuseColor.rgb = mix(diffuseColor.rgb, mix(depositedLoad, paintedColor, ${profile.atlasResidue.toFixed(2)}), uOilPaintReady);`
+          : `float directPigment = uOilDirectPigment;
+          ${surface === 'canyon' ? 'directPigment *= mix(.24, 1., smoothstep(.025, .18, pigmentLight));' : ''}
+          diffuseColor.rgb = mix(diffuseColor.rgb, paintedColor, directPigment * uOilPaintReady);`}`);
         shader.fragmentShader = shader.fragmentShader.replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
           vec3 oilS = dFdx(-vViewPosition), oilT = dFdy(-vViewPosition);
           vec3 oilR1 = cross(oilT, normal), oilR2 = cross(normal, oilS);
@@ -236,9 +268,12 @@ export function applyOilMaterials(scene, { richPigment = false, stochasticPigmen
         shader.fragmentShader = shader.fragmentShader.replace('#include <lights_physical_fragment>', `#include <lights_physical_fragment>
           #ifdef USE_CLEARCOAT
             material.clearcoatRoughness = clamp(material.clearcoatRoughness + (1. - oil.y) * .10 - oil.z * .08, .14, .4);
+            ${surface === 'canyon' ? `float paintRim = smoothstep(.45, .69, oil.x);
+            material.clearcoat = mix(.26, .55, paintRim);
+            material.clearcoatRoughness = mix(.28, .22, paintRim);` : ''}
           #endif`);
       };
-      material.customProgramCacheKey = () => `pigment-viscous-atlas-v12-${surface}-${moving}-${richPigment}-${anchored}-${stochasticPigment}`;
+      material.customProgramCacheKey = () => `pigment-viscous-atlas-v14-${surface}-${moving}-${richPigment}-${anchored}-${stochasticPigment}-${blade}`;
       material.needsUpdate = true;
       variants.set(key, material);
       return material;

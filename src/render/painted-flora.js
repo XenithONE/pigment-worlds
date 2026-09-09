@@ -65,6 +65,7 @@ export function addPaintedFlora(scene, { id = 0, baseHeight, pathX, isPond = () 
     mesh.receiveShadow = true;
     mesh.castShadow = true;
     mesh.userData.pigmentSurface = 'foliage';
+    mesh.userData.pigmentBladeUV = true;
     plants.forEach((plant, index) => {
       dummy.position.set(plant.x, plant.y, plant.z);
       dummy.rotation.set(0, plant.yaw, 0);
