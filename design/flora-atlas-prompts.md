@@ -1,14 +1,16 @@
-# Painted botanical atlas
+# Painted botanical atlas — historical asset
 
 Created with the built-in image generation tool for PIGMENT, September 2026. This is original generated oil-style artwork, not a reproduction or a crop of a game screenshot.
 
+This records the earlier botanical image-card implementation. v15 does not load or use this atlas: [painted-flora.js](../src/render/painted-flora.js) now instantiates closed 3D leaves, petals and stems from [pigment-herbs.js](../src/render/pigment-herbs.js). The source files and prompts remain as production history.
+
 - Selected source: [source-images/flora-atlas.png](source-images/flora-atlas.png), 1254 × 1254 RGBA.
-- Runtime copy: [../public/art/materials/flora-atlas.webp](../public/art/materials/flora-atlas.webp), lossless WebP, 2,369,598 bytes. The original alpha is preserved.
+- Former runtime copy, retained but unused by v15: [../public/art/materials/flora-atlas.webp](../public/art/materials/flora-atlas.webp), lossless WebP, 2,369,598 bytes. The original alpha is preserved.
 - Quadrants: blue iris/gold wildflowers, pink/ivory/lilac garden, crimson/ochre autumn, cream/blue coastal grasses.
-- Renderer: [../src/render/painted-flora.js](../src/render/painted-flora.js). Each clump uses two crossed textured planes. These are a middle-distance supplement to the closed 3D plants, with world lighting, received shadows, fog, instancing, and camera-distance removal. They are not modeled botanical meshes.
-- The source has real transparent alpha and natural holes between leaves. Most interior alpha is 242–252/255, with low-alpha fringe around some contours; alpha testing removes that fringe. A narrow shader border taper and UV inset protect atlas boundaries. Large safe gutters requested in the prompt were not fully followed, so this is not a general-purpose foliage atlas for arbitrary filtering settings.
-- Do not use this atlas as an extreme close-up. The renderer removes cards near the camera and does not cast static card shadows that would remain after their camera-dependent fade.
-- Two built-in extraction edits were rejected because they baked a checkerboard backdrop into RGB. Only the first genuinely transparent result is shipped.
+- Earlier renderer: each clump used two crossed textured planes as a middle-distance supplement to closed 3D plants, with world lighting, received shadows, fog, instancing, and camera-distance removal. Those cards were not modeled botanical meshes and have been replaced in v15.
+- The source has real transparent alpha and natural holes between leaves. Most interior alpha is 242–252/255, with low-alpha fringe around some contours; the earlier renderer used alpha testing to remove that fringe. A narrow shader border taper and UV inset protected atlas boundaries. Large safe gutters requested in the prompt were not fully followed, so this is not a general-purpose foliage atlas for arbitrary filtering settings.
+- The earlier renderer removed cards near the camera and did not cast static card shadows that would remain after their camera-dependent fade. The atlas was unsuitable for extreme close-ups.
+- Two built-in extraction edits were rejected because they baked a checkerboard backdrop into RGB. Only the first genuinely transparent result was selected for the earlier implementation and remains in the repository.
 
 ## Selected generation prompt
 

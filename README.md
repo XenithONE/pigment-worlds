@@ -70,7 +70,7 @@ Three.js / WebGL 2でリアルタイムに描画し、Viteで静的サイトと�
 
 文字にはFontsourceのCormorant GaramondとNoto Serif JPを使い、フォントファイルをサイトと一緒に配信します。閲覧時に外部のフォント配信サービスへ接続する必要はありません。環境音と収集時の音はWeb Audio APIで合成し、録音素材や楽曲のサンプルは使用していません。
 
-空は背景画像です。星月夜の街並み、庭園と黄金の渓谷の遠景は、世界内に固定した曲面へ貼った静止画を距離を変えて配置しています。近景の3Dと遠景の絵画を組み合わせる方式で、遠くの描かれた建物へ入れるわけではありません。生成指示と仕様は [vista-prompts.md](design/vista-prompts.md) と [canyon-vista-prompts.md](design/canyon-vista-prompts.md)、筆触・顔料・中景植物については [impasto-material-prompts.md](design/impasto-material-prompts.md) と [flora-atlas-prompts.md](design/flora-atlas-prompts.md) に残しています。水の反射は平面を前提とした近似、絵具の流れは見た目の表現です。流体や顔料の物理シミュレーションではありません。
+空は背景画像です。星月夜の街並み、庭園と黄金の渓谷の遠景は、世界内に固定した曲面へ貼った静止画を距離を変えて配置しています。近景の3Dと遠景の絵画を組み合わせる方式で、遠くの描かれた建物へ入れるわけではありません。生成指示と仕様は [vista-prompts.md](design/vista-prompts.md) と [canyon-vista-prompts.md](design/canyon-vista-prompts.md)、筆触・顔料については [impasto-material-prompts.md](design/impasto-material-prompts.md) に残しています。[flora-atlas-prompts.md](design/flora-atlas-prompts.md) は、現在は使っていない旧中景植物の画像素材の制作履歴です。v15の中景植物は閉じた3D形状です。水の反射は平面を前提とした近似、絵具の流れは見た目の表現です。流体や顔料の物理シミュレーションではありません。
 
 移動は地形の高さと範囲に沿い、大きな岩・幹を簡易的な円で避けます。全物体に精密な衝突判定があるわけではなく、屋内探索・泳ぎ・戦闘はありません。WebGL 2が必要で、描画速度と見え方は端末・ブラウザによって異なります。高画質が重い場合は自動または軽量を使ってください。
 
