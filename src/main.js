@@ -5,8 +5,10 @@ import { createWorld } from './render/worlds.js';
 import { applyOilMaterials, loadOilPaintTexture } from './render/oil-material.js';
 import { applySculptedRelief } from './render/surface-relief.js';
 import { loadPaintedFloraAtlas } from './render/painted-flora.js';
+import { loadPaintedVistas, addPaintedVistas } from './render/painted-vistas.js';
 import { WORLD_INFO, SAVE_KEY, createJourney, moveOnGround } from './simulation/journey.js';
 import { slideAroundPaint } from './simulation/collision.js';
+import { constrainTerrainStep } from './simulation/terrain-walk.js';
 import { Soundscape } from './audio.js';
 
 const $=s=>document.querySelector(s);
@@ -84,6 +86,13 @@ function setWorld(id){
   runtime.worldId=id;
   const previous=world;
   world=createWorld(id,{skyTextures,portalTextures,reducedMotion});
+  const vista=addPaintedVistas(world.scene,{id});
+  if(id===0||id===1) world.scene.traverse(object=>{
+    const materials=Array.isArray(object.material)?object.material:[object.material];
+    if(object.name.startsWith('mountain-range-')||(id===0&&(object.name.startsWith('castle-')||object.name.startsWith('village-windows')||materials.some(m=>m?.name?.startsWith('village-painted-'))))) object.visible=false;
+  });
+  const disposeWorld=world.dispose;
+  world.dispose=()=>{vista.dispose();disposeWorld();};
   world.relief=applySculptedRelief(world.scene);
   world.memoryMeshes.forEach(group=>group.traverse(object=>{object.castShadow=false;}));
   world.oil=applyOilMaterials(world.scene);
@@ -204,7 +213,14 @@ function animate(now){
       const s=Number(keys.has('KeyD'))-Number(keys.has('KeyA'))+stick.x;
       runtime.yaw+=(Number(keys.has('KeyQ')||keys.has('ArrowLeft'))-Number(keys.has('KeyE')||keys.has('ArrowRight')))*dt*1.1;
       const desired=moveOnGround(runtime,runtime.yaw,f,s,dt,keys.has('ShiftLeft')||keys.has('ShiftRight')?7.3:4.2);
-      const pos=slideAroundPaint(runtime,desired,world.obstacles);
+      const aroundRocks=slideAroundPaint(runtime,desired,world.obstacles);
+      const pos=runtime.worldId===0?constrainTerrainStep(runtime,aroundRocks,world.groundHeight,{
+        isPositionAllowed:(x,z,from)=>world.obstacles.every(obstacle=>{
+          const radius=obstacle.radius+.26;
+          const after=Math.hypot(x-obstacle.x,z-obstacle.z),before=Math.hypot(from.x-obstacle.x,from.z-obstacle.z);
+          return after>=radius||(before<radius&&after>=before-1e-8);
+        }),
+      }):aroundRocks;
       runtime.x=pos.x;runtime.z=pos.z;
       const bob=!reducedMotion&&(f||s)?Math.sin(elapsed*8)*.026:0;
       const y=world.groundHeight(runtime.x,runtime.z)+1.8+bob;
@@ -244,7 +260,7 @@ async function boot(){
     portalTextures=await Promise.all(WORLD_INFO.map(async info=>{const texture=await loader.loadAsync(`${import.meta.env.BASE_URL}art/${info.sky.replace('-sky','-portal')}.webp`);texture.colorSpace=THREE.SRGBColorSpace;return texture;}));
     const pmrem=new THREE.PMREMGenerator(renderer);environmentMaps=skyTextures.map(texture=>pmrem.fromEquirectangular(texture));pmrem.dispose();
     $('#loading-status').textContent='厚い絵具に、光を入れています';
-    await Promise.all([loadOilPaintTexture(),loadPaintedFloraAtlas()]);
+    await Promise.all([loadOilPaintTexture(),loadPaintedFloraAtlas(),loadPaintedVistas()]);
     setWorld(0);await renderer.compileAsync(world.scene,camera);runtime.ready=true;
     $('#start-button').disabled=false;$('#start-button span').textContent='旅をはじめる';$('#loading-status').textContent='';
     requestAnimationFrame(animate);

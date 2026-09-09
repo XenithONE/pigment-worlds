@@ -1,0 +1,100 @@
+{
+  "sourceSHA256": "dacb18c5fd4b7bb29732f571f31e45264c3f4d2615e75193f8ab487e8370f95e",
+  "meshes": 21,
+  "strata": 6,
+  "finite": true,
+  "nonUnitNormals": 0,
+  "degenerateTriangles": 0,
+  "triangles": 54320,
+  "allStrataNormalsTowardRiver": true,
+  "riverFacingTriangles": 17952,
+  "otherFacingTriangles": 0,
+  "worstFace": {
+    "layer": 1,
+    "triangle": 2977,
+    "normal": [
+      -0.014661747936581022,
+      0.5990749932763874,
+      -0.8005586709157179
+    ],
+    "center": [
+      2.408028443654378,
+      -0.14341651399930316,
+      -32.22222137451172
+    ]
+  },
+  "maxBandSeamDistance": 0,
+  "topConnectionYRange": [
+    0.04499830093414703,
+    0.045001558257620644
+  ],
+  "bottomConnectionYRange": [
+    -0.09000085673312608,
+    -0.08999954559776147
+  ],
+  "terrainRange": [
+    -1.35,
+    13.535657068145024
+  ],
+  "reversedFaces": {
+    "zRange": [
+      null,
+      null
+    ],
+    "yRange": [
+      null,
+      null
+    ],
+    "aboveWater": 0,
+    "terrainExposed": 0,
+    "aboveWaterAndTerrainExposed": 0,
+    "firstExposed": null
+  },
+  "columnHeights": {
+    "min": 0.20408615469932556,
+    "max": 9.33030366897583,
+    "negativeCount": 0,
+    "lowCount": 1,
+    "firstNegative": null
+  },
+  "bandSeamComparisons": 940,
+  "missingBandBoundaryVertices": 0,
+  "activeGeometryCount": 21,
+  "activeMaterialCount": 7,
+  "temporaryGeometriesDisposedBeforeTeardown": 13,
+  "sceneEmpty": true,
+  "activeGeometryDisposeCounts": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "activeMaterialDisposeCounts": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "allCreatedMaterialDisposals": 7,
+  "allDisposalCountsOne": true
+}

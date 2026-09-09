@@ -5,6 +5,8 @@ import { addSculptedScenery } from './sculpted-scenery.js';
 import { createPaintWaterMaterial } from './paint-water.js';
 import { addPaintedFlora } from './painted-flora.js';
 import { addPaintedVessels } from './vessel-scenery.js';
+import { addPaintValley, valleyHeight, valleyRiverContains } from './paint-valley.js';
+import { addBotanicalSculptures } from './botanical-sculptures.js';
 
 // The scenery is original, traversable geometry. Generated paintings supply the
 // sky panoramas; small, instanced impasto marks make up the living foreground.
@@ -50,6 +52,23 @@ function roundedPaintDaub(width, depth, curve) {
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(points, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3)); g.setIndex(indices); return g;
 }
 function makeStrokeGeometry() { return roundedPaintDaub(.47, .14, .045); }
+function makeGrassBladeGeometry(rows = 12, sides = 8) {
+  const points = [], uvs = [], indices = [];
+  for (let row = 0; row <= rows; row++) {
+    const t = row / rows, width = .075 * (.55 + .45 * Math.sin(Math.PI * t)) * (1 - t) ** .72 + .0005;
+    for (let side = 0; side <= sides; side++) {
+      const a = side / sides * TAU;
+      points.push(Math.cos(a) * width + .035 * Math.sin(t * 3.6), t - .5,
+        .14 * t * t + Math.sin(a) * (.010 * (1 - t) + .0005));
+      uvs.push(side / sides, t);
+      if (row < rows && side < sides) { const k = row * (sides + 1) + side; indices.push(k, k + sides + 1, k + 1, k + 1, k + sides + 1, k + sides + 2); }
+    }
+  }
+  const bottom = points.length / 3, top = bottom + 1;
+  points.push(0, -.5, 0, .035 * Math.sin(3.6), .5, .14); uvs.push(.5, 0, .5, 1);
+  for (let side = 0; side < sides; side++) { indices.push(bottom, side, side + 1); const k = rows * (sides + 1); indices.push(top, k + side + 1, k + side); }
+  const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3)); geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2)); geometry.setIndex(indices); geometry.computeVertexNormals(); return geometry;
+}
 function makeLeafGeometry() {
   const points = [], uv = [], indices = [], rows = 14, sides = 12;
   for (let row = 0; row <= rows; row++) {
@@ -130,7 +149,9 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
   const darkGoldMat = material(new THREE.MeshStandardMaterial({ color: '#715324', roughness: .5, metalness: .68 }));
   for (const [mat, surface] of [[groundMat, 'ground'], [pathMat, 'path'], [barkMat, 'bark'], [brushMat, 'foliage'], [goldMat, 'gold'], [darkGoldMat, 'gold']]) { mat.name = `pigment-${surface}`; mat.userData.pigmentSurface = surface; }
   const strokeGeo = geo(makeStrokeGeometry()), leafGeo = geo(makeLeafGeometry()), petalGeo = geo(makePetalGeometry());
+  const grassGeo = geo(makeGrassBladeGeometry());
   const detailGeometry = new Map([
+    [grassGeo, [grassGeo, geo(makeGrassBladeGeometry(5, 5)), geo(makeGrassBladeGeometry(2, 4))]],
     [strokeGeo, [strokeGeo, geo(makeCompactPaintGeometry('stroke')), geo(makeCompactPaintGeometry('stroke', true))]],
     [leafGeo, [leafGeo, geo(makeCompactPaintGeometry('leaf')), geo(makeCompactPaintGeometry('leaf', true))]],
     [petalGeo, [petalGeo, geo(makeCompactPaintGeometry('petal')), geo(makeCompactPaintGeometry('petal', true))]],
@@ -149,6 +170,7 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
   }
   function stamp(name, geometry, mat, x, y, z, sx, sy, sz, rx, ry, rz, col, groundGrowth = false) {
     if (groundGrowth && groundGrowthGap(x, z)) return;
+    if (name === 'grass' && (id === 0 || id === 1)) geometry = grassGeo;
     const key = spatialBatches.has(name) ? `${name}:${Math.floor(x / 12)},${Math.floor(z / 12)}` : name;
     if (!batches.has(key)) batches.set(key, { name, key, geometry, mat, items: [] });
     batches.get(key).items.push([x, y, z, sx, sy, sz, rx, ry, rz, col]);
@@ -184,10 +206,7 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
     if (id === 3) return .25 + Math.sin(x * .07 + z * .08) * .55 + .25 * Math.sin(z * .2) + smoothstep(-9, 18, x) * 1.3 + shoulder * (hill(19, 5, 13, 4.5) + hill(31, -35, 20, 7));
     const ripple = .35 + Math.sin(x * .085) * .45 + Math.sin(z * .09) * .43 + Math.sin(x * .16 + z * .12) * .2;
     if (id === 2) return ripple + shoulder * (hill(-13, -3, 15, 2.8) + hill(23, -21, 19, 4.6) + hill(-28, -53, 22, 6));
-    const upland = ripple + shoulder * (hill(-9, 6, 9, 2.8) + hill(16, -4, 12, 3.5) + hill(-23, -49, 24, 7.8) + hill(33, -67, 22, 13));
-    const valley = ((x - 6) / 20) ** 2 + ((z + 54) / 25) ** 2;
-    const basin = 1 - smoothstep(.67, 1.14, valley);
-    return THREE.MathUtils.lerp(upland, -1.35 + .10 * Math.sin(x * .17 + z * .21), basin);
+    return valleyHeight(x,z,pathX);
   }
   function groundHeight(x, z) {
     if (id === 1 && Math.abs(z + 5) <= 1.65 && x >= -25 && x <= 3) return .43 + 2.5 * Math.sin(Math.PI * (x + 25) / 28);
@@ -197,7 +216,7 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
   // smoothstep is increasing; this explicit blend keeps the traversable trail
   // visually connected to the frame in all four worlds.
   function pathX(z) { const t = THREE.MathUtils.clamp((15 - z) / 24, 0, 1); return Math.sin(t * Math.PI) * -1.4 + 7 * t; }
-  function isPond(x, z) { return id === 0 ? ((x - 6) / 20) ** 2 + ((z + 54) / 25) ** 2 < .82 : id === 1 && ((x + 12) / 14) ** 2 + ((z + 5) / 19) ** 2 < 1; }
+  function isPond(x, z) { return id === 0 ? valleyRiverContains(x,z,pathX)||((x - 6) / 20) ** 2 + ((z + 54) / 25) ** 2 < .82 : id === 1 && ((x + 12) / 14) ** 2 + ((z + 5) / 19) ** 2 < 1; }
   function isSea(x, z) { return id === 3 && x < -8.5 + Math.sin(z * .095) * 2; }
   const terrain = new THREE.PlaneGeometry(220, 220, 240, 240); terrain.rotateX(-Math.PI / 2);
   const pos = terrain.attributes.position, colors = [];
@@ -210,7 +229,7 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
     const z = 35 - i * .29, x = pathX(z), width = 1.22 + .08 * Math.sin(i * .19) + .04 * Math.sin(i * .61);
     for (let j = 0; j < pathColumns; j++) { const side = j / (pathColumns - 1) * 2 - 1, xx = x + side * width; const ridge = .02 * Math.sin(xx * 19 + z * 3.8) + .014 * Math.sin(xx * 45 - z * 7); pathVertices.push(xx, baseHeight(xx, z) + .06 + ridge * (1 - side * side), z); pathUV.push(j / (pathColumns - 1), i / 55); if (i < 280 && j < pathColumns - 1) { const a = i * pathColumns + j; pathIndices.push(a, a + 1, a + pathColumns, a + pathColumns, a + 1, a + pathColumns + 1); } }
   }
-  const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.Float32BufferAttribute(pathVertices, 3)); pg.setAttribute('uv', new THREE.Float32BufferAttribute(pathUV, 2)); pg.setIndex(pathIndices); pg.computeVertexNormals(); mesh(pg, pathMat);
+  const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.Float32BufferAttribute(pathVertices, 3)); pg.setAttribute('uv', new THREE.Float32BufferAttribute(pathUV, 2)); pg.setIndex(pathIndices); pg.computeVertexNormals(); mesh(pg, pathMat).name = 'walkable-paint-ribbon';
 
   if (skyTextures[id]) {
     const skyGeometry = new THREE.SphereGeometry(175, 72, 36);
@@ -245,14 +264,25 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
     // Plants newly admitted beside the narrower path use an independent stream.
     // Existing placement/obstacle randomness is therefore exactly preserved.
     const plantRandom = pathDistance < 1.87 ? edgeGrowthRandom : random;
+    const sculptedNear = (id === 0 || id === 1) && z > -20 && z < 25 && pathDistance < 9;
+    // Keep the placement stream stable while replacing the repeated foreground
+    // blossoms with complete sculpted plants and finer undergrowth.
+    const stampGrowth = (...args) => {
+      if (sculptedNear && ['flowers', 'flower-stems', 'pollen'].includes(args[0])) return;
+      if (sculptedNear && args[0] === 'grass') {
+        if (i % 2 !== 0) return;
+        args[6] *= .8; args[7] *= .95; args[8] *= .7;
+      }
+      stamp(...args);
+    };
     const growthPatch = .5 + .5 * Math.sin(x * .43 + Math.cos(z * .29) * 1.9) * Math.sin(z * .37 + .6);
     const y = baseHeight(x, z), height = .28 + plantRandom() * .29 + growthPatch * .31, col = p.leaf[Math.floor(plantRandom() * p.leaf.length)];
-    stamp('grass', leafGeo, brushMat, x, y + height * .34, z, .42 + growthPatch * .43 + plantRandom() * .18, height, .9, -.25 + plantRandom() * .52, plantRandom() * TAU, (plantRandom() - .5) * .95, col, true);
+    stampGrowth('grass', leafGeo, brushMat, x, y + height * .34, z, .42 + growthPatch * .43 + plantRandom() * .18, height, .9, -.25 + plantRandom() * .52, plantRandom() * TAU, (plantRandom() - .5) * .95, col, true);
     const flowerPatch = .5 + .5 * Math.sin(x * .39 + Math.sin(z * .22) * 1.8) * Math.sin(z * .31 + .8);
     if (i % (id === 3 ? 15 : 6) === 0 && growthHue > .16 && flowerPatch > .2) {
       const heroScale = Math.abs(x - pathX(z)) < 6 && z > -18 ? 1.25 : 1;
       const fy = y + .30 + flowerPatch * .36 + plantRandom() * .26, fc = p.flower[id === 0 ? growthHue < .55 ? Math.floor(plantRandom() * 2) : growthHue < .92 ? 2 + Math.floor(plantRandom() * 2) : 4 : Math.floor(growthHue * p.flower.length)], size = (.07 + flowerPatch * .09 + plantRandom() * .09) * heroScale;
-      stamp('flower-stems', stemGeo, brushMat, x, (y + fy) * .5, z, 1, fy - y, 1, 0, 0, 0, p.leaf[3], true);
+      stampGrowth('flower-stems', stemGeo, brushMat, x, (y + fy) * .5, z, 1, fy - y, 1, 0, 0, 0, p.leaf[3], true);
       const slots = flowerPatch > .7 ? 5 : 6, petals = 3 + Math.floor((.5 + .5 * Math.sin(x * 3.7 + z * 6.3)) * 2.99), upright = id === 0 && flowerPatch > .56;
       const bloomTurn = Math.sin(x * 2.3 + z * 4.9) * TAU;
       for (let j = 0; j < slots; j++) {
@@ -262,9 +292,9 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
         const a = bloomTurn + j * TAU / petals + (variation - .5) * .36;
         const tilt = (upright ? -.74 : -1.29) + (variation - .5) * .95;
         const length = .74 + .5 * (.5 + .5 * Math.sin(j * 2.7 + x * 5.2 + z * 1.9));
-        stamp('flowers', petalGeo, brushMat, x, fy + size * .07 * Math.sin(a), z, size * (.92 + variation * .81), size * (upright ? 2.02 : 1.62) * length, size * (1.1 + variation * .55), tilt, .15 * Math.sin(bloomTurn), a, fc, true);
+        stampGrowth('flowers', petalGeo, brushMat, x, fy + size * .07 * Math.sin(a), z, size * (.92 + variation * .81), size * (upright ? 2.02 : 1.62) * length, size * (1.1 + variation * .55), tilt, .15 * Math.sin(bloomTurn), a, fc, true);
       }
-      stamp('pollen', sphereGeo, brushMat, x, fy + .018, z, size * .25, size * .15, size * .25, 0, 0, 0, id === 0 ? '#634422' : '#e9ba58', true);
+      stampGrowth('pollen', sphereGeo, brushMat, x, fy + .018, z, size * .25, size * .15, size * .25, 0, 0, 0, id === 0 ? '#634422' : '#e9ba58', true);
     }
     if (i % 6 === 0) {
       stamp('fallen-pigment', strokeGeo, brushMat, x, y + .043, z, .18 + plantRandom() * .3, .24 + plantRandom() * .42, .19 + plantRandom() * .12, -Math.PI / 2, 0, plantRandom() * TAU, i % 30 === 0 ? p.flower[Math.floor(plantRandom() * p.flower.length)] : p.ground[Math.floor(plantRandom() * p.ground.length)], true);
@@ -341,7 +371,14 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
   rockGeo.computeVertexNormals();
   const rockMat = painted(id === 0 ? ['#536077', '#7d817b', '#383e51', '#a39b79'] : id === 3 ? ['#727f85', '#a3a598', '#5d6d75', '#c5bd9f'] : ['#929783', '#b3b69c', '#747b68', '#cec7a9']);
   rockMat.name = 'pigment-rock'; rockMat.userData.pigmentSurface = 'rock';
-  addSculptedScenery({ id, scene, random, baseHeight, pathX, isPond, isSea, mesh, painted, material, mergeParts, transform, tube, goldMat, stamp, leafGeo, petalGeo, brushMat, stemGeo, p, obstacles, clearingPositions, skyTextures, textures });
+  const stampScenery = (...args) => {
+    if (id === 0 || id === 1) {
+      if (args[0] === 'grass') { args[6] *= .8; args[8] *= .7; }
+      if (args[0] === 'flowers') { args[6] *= .48; args[7] *= .60; args[8] *= .5; }
+    }
+    stamp(...args);
+  };
+  addSculptedScenery({ id, scene, random, baseHeight, pathX, isPond, isSea, mesh, painted, material, mergeParts, transform, tube, goldMat, stamp:stampScenery, leafGeo, petalGeo, brushMat, stemGeo, p, obstacles, clearingPositions, skyTextures, textures });
   for (let i = 0; i < (id === 3 ? 35 : 45); i++) {
     const z = (random() - .5) * 120 - 8, x = id === 3 ? -9 + Math.sin(z * .095) * 2 + (random() - .5) * 4 : (random() < .5 ? -1 : 1) * (4 + random() * 35);
     if (Math.abs(x - pathX(z)) < 3 || isPond(x, z)) continue;
@@ -375,7 +412,7 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
     mergeParts(walls, wallMat); mergeParts(roofs, roofMat);
     const churchY = baseHeight(-20, -58); mesh(new RoundedBoxGeometry(1.35, 4.5, 1.45, 3, .09), wallMat).position.set(-20, churchY + 2.25, -58);
     mesh(new THREE.ConeGeometry(1.05, 3.2, 8), roofMat).position.set(-20, churchY + 6.1, -58);
-    water(6, -54, 40, 50, -.62);
+    water(-5, -17, 80, 112, -.62);
     // Volumetric-looking star filaments behind the trees, made of fine paint dashes.
     const starMat = material(new THREE.MeshBasicMaterial({ color: '#ffffff', toneMapped: false, side: THREE.DoubleSide }));
   } else if (id === 1) {
@@ -517,10 +554,13 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
   const particleMat = material(new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: { uTime: { value: 0 }, uColor: { value: new THREE.Color(id === 1 ? '#fff2d5' : '#ffe19b') } }, vertexShader: `attribute float aSize;attribute float aPhase;uniform float uTime;varying float vAlpha;void main(){vec3 p=position;p.x+=sin(uTime*.22+aPhase)*.24;p.y+=sin(uTime*.38+aPhase)*.3;vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;gl_PointSize=clamp(aSize*75./max(1.,-mv.z),1.,13.);vAlpha=.42+.3*sin(aPhase+uTime*.65);}`, fragmentShader: `uniform vec3 uColor;varying float vAlpha;void main(){float d=length(gl_PointCoord-.5)*2.;if(d>1.)discard;gl_FragColor=vec4(uColor,pow(1.-d,2.)*vAlpha);}` }));
   scene.add(new THREE.Points(particleGeo, particleMat)); animated.push(time => { particleMat.uniforms.uTime.value = reducedMotion ? 0 : time; });
   const removePaintedFlora = addPaintedFlora(scene, { id, baseHeight, pathX, isPond, isSea });
+  const removePaintValley = addPaintValley(scene,{id,pathX,baseHeight});
+  const removeBotanicals = addBotanicalSculptures(scene,{id,baseHeight,pathX,isPond,isSea,density:1.7});
   flush();
 
   function updateDetail(camera) {
     if (!camera) return;
+    removeBotanicals.update?.(camera, detailLevel);
     const mobileAuto = detailLevel === 'auto' && typeof matchMedia === 'function' && (matchMedia('(pointer: coarse)').matches || matchMedia('(max-width: 700px)').matches);
     const low = detailLevel === 'low' || mobileAuto, high = detailLevel === 'high';
     const near = low ? 9 : high ? 28 : 21, middle = low ? 18 : high ? 52 : 40;
@@ -542,7 +582,7 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
       if (reducedMotion || Math.abs(time - lastDetailUpdate) > .18) { updateDetail(camera); lastDetailUpdate = time; }
     },
     dispose() {
-      removePaintedFlora();
+      removePaintedFlora();removePaintValley();removeBotanicals();
       geometries.forEach(g => g.dispose()); materials.forEach(m => m.dispose()); textures.forEach(t => t.dispose());
       scene.traverse(obj => { if (obj.isInstancedMesh) obj.dispose(); }); scene.clear();
     },

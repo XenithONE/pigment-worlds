@@ -76,7 +76,7 @@ export function createPaintWaterMaterial(color, worldId) {
   return {
     material,
     attachReflection(surface, scene) {
-      if (worldId !== 1 && worldId !== 3) return;
+      if (worldId !== 0 && worldId !== 1 && worldId !== 3) return;
       const { width, height } = surface.geometry.parameters;
       mirror = new Reflector(new THREE.PlaneGeometry(width, height), { textureWidth: 768, textureHeight: 768, multisample: 2, clipBias: .005 });
       mirror.name = 'Painted water reflection capture';

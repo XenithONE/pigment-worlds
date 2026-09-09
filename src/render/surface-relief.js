@@ -31,18 +31,21 @@ function swipe(x, y) {
 export function applySculptedRelief(scene) {
   prepareHeight();
   if (sourceSize < 2) return { dispose() {} };
-  const originals = [], modifier = new TessellateModifier(.14, 3), normal = new Vector3();
+  const originals = [], modifier = new TessellateModifier(.14, 3), pathModifier = new TessellateModifier(.075, 4), normal = new Vector3();
   scene.traverse(object => {
-    if (!object.isMesh || object.isInstancedMesh || !/painted-rock-bodies|stratified-paint-shelves/.test(object.name)) return;
-    const original = object.geometry, geometry = modifier.modify(original);
+    if (!object.isMesh || object.isInstancedMesh || !/painted-rock-bodies|stratified-paint-shelves|walkable-paint-ribbon|path-palette-knife-scoops|path-raised-brush-ridges/.test(object.name)) return;
+    const path = /walkable-paint-ribbon|path-palette-knife-scoops|path-raised-brush-ridges/.test(object.name);
+    const original = object.geometry, geometry = (path ? pathModifier : modifier).modify(original);
     const positions = geometry.attributes.position, normals = geometry.attributes.normal;
     for (let i = 0; i < positions.count; i++) {
       normal.fromBufferAttribute(normals, i).normalize();
       const x = positions.getX(i), y = positions.getY(i), z = positions.getZ(i);
       const wx = Math.abs(normal.x) ** 5, wy = Math.abs(normal.y) ** 5, wz = Math.abs(normal.z) ** 5;
-      const height = (swipe(z * .26, y * .19) * wx + swipe(x * .26, z * .26) * wy + swipe(x * .26, y * .19) * wz) / Math.max(.0001, wx + wy + wz);
-      const amount = (height - .48) * .19;
-      positions.setXYZ(i, x + normal.x * amount, y + normal.y * amount, z + normal.z * amount);
+      const height = path ? swipe(x * .17, z * .17) : (swipe(z * .26, y * .19) * wx + swipe(x * .26, z * .26) * wy + swipe(x * .26, y * .19) * wz) / Math.max(.0001, wx + wy + wz);
+      const amount = path ? Math.max(0, height - .25) * .24 : (height - .48) * .19;
+      // All path layers share the same vertical paint field, preserving their
+      // order while raising real pigment ridges above the walkable substrate.
+      positions.setXYZ(i, x + (path ? 0 : normal.x * amount), y + (path ? amount : normal.y * amount), z + (path ? 0 : normal.z * amount));
     }
     // Rebuild shared normals after physical displacement, without artificial
     // UV boundaries: these materials use spatial projection throughout.
