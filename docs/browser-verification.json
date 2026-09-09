@@ -1,310 +1,398 @@
 {
-  "boot": {
-    "worldId": 0,
-    "started": false,
-    "ready": true,
-    "position": {
-      "x": 0,
-      "z": 15,
-      "yaw": 0,
-      "pitch": -0.015
+  "date": "2026-09-09",
+  "scope": "Impasto rebuild: final art captures, actual-keyboard 12-color traversal and persistence, desktop/touch controls and quality changes",
+  "desktop": {
+    "health": {
+      "title": "PIGMENT — 絵の向こうへ",
+      "meaningful": "光の海岸",
+      "overflow": false,
+      "errorPanel": false,
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Ti (0x00001B06) Direct3D11 vs_5_0 ps_5_0, D3D11)"
     },
-    "collected": [],
-    "visited": [],
-    "memories": [
+    "errors": [],
+    "warnings": [
+      "THREE.WebGLProgram: Program Info Log: (210,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(209,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(210,82-106): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(209,37-61): warning X4122: sum of 1 and -1.66644e-018 cannot be represented accurately in double precision\n(210,82-106): warning X4122: sum of 1 and -1.66644e-018 cannot be represented accurately in double precision\n\n\n\u0000",
+      "THREE.WebGLProgram: Program Info Log: (105,1-6): warning X4000: use of potentially uninitialized variable (dyn_index_vec4_float4_int)\n\n\n\u0000"
+    ],
+    "worlds": [
       {
-        "id": "0-a",
-        "x": -4,
-        "z": 4
+        "world": 0,
+        "positionBefore": {
+          "x": 0,
+          "z": 15,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "positionAfter": {
+          "x": 0,
+          "z": 9.820139999999983,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "quality": "high",
+        "pixelRatio": 1.25,
+        "triangles": 9994297,
+        "drawCalls": 233,
+        "frameMedian": 33.19999999999709,
+        "frameP95": 33.400000000001455
       },
       {
-        "id": "0-b",
-        "x": -8,
-        "z": -9
+        "world": 1,
+        "positionBefore": {
+          "x": 0,
+          "z": 15,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "positionAfter": {
+          "x": 0,
+          "z": 9.81972000000002,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "quality": "high",
+        "pixelRatio": 1.25,
+        "triangles": 12167909,
+        "drawCalls": 524,
+        "frameMedian": 33.30000000000291,
+        "frameP95": 33.400000000001455
       },
       {
-        "id": "0-c",
-        "x": 10,
-        "z": -21
+        "world": 2,
+        "positionBefore": {
+          "x": 0,
+          "z": 15,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "positionAfter": {
+          "x": 0,
+          "z": 9.81972000000001,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "quality": "high",
+        "pixelRatio": 1.25,
+        "triangles": 8039821,
+        "drawCalls": 275,
+        "frameMedian": 33.29999999998836,
+        "frameP95": 33.40000000000873
+      },
+      {
+        "world": 3,
+        "positionBefore": {
+          "x": 0,
+          "z": 15,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "positionAfter": {
+          "x": 0,
+          "z": 9.819719999999949,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "quality": "high",
+        "pixelRatio": 1.25,
+        "triangles": 10785337,
+        "drawCalls": 441,
+        "frameMedian": 33.30000000000291,
+        "frameP95": 33.40000000000873
+      }
+    ]
+  },
+  "mobile": {
+    "health": {
+      "title": "PIGMENT — 絵の向こうへ",
+      "meaningful": "睡蓮の庭",
+      "overflow": false,
+      "errorPanel": false,
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Ti (0x00001B06) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+    },
+    "errors": [],
+    "worlds": [
+      {
+        "world": 0,
+        "positionBefore": {
+          "x": 0,
+          "z": 15,
+          "yaw": -0.2,
+          "pitch": -0.015
+        },
+        "positionAfter": {
+          "x": 0,
+          "z": 15,
+          "yaw": -0.2,
+          "pitch": -0.015
+        },
+        "quality": "auto",
+        "pixelRatio": 1,
+        "triangles": 3001405,
+        "drawCalls": 144,
+        "frameMedian": 16.69999999999709,
+        "frameP95": 16.80000000000291
+      },
+      {
+        "world": 1,
+        "positionBefore": {
+          "x": 0,
+          "z": 15,
+          "yaw": -0.2,
+          "pitch": -0.015
+        },
+        "positionAfter": {
+          "x": 0,
+          "z": 15,
+          "yaw": -0.2,
+          "pitch": -0.015
+        },
+        "quality": "auto",
+        "pixelRatio": 1,
+        "triangles": 3045380,
+        "drawCalls": 180,
+        "frameMedian": 16.69999999999709,
+        "frameP95": 16.80000000000291
+      }
+    ]
+  },
+  "journey": {
+    "errors": [],
+    "proof": [
+      {
+        "memory": "0-a",
+        "position": {
+          "x": -3.779011983898674,
+          "z": 5.138628016101288,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "collected": 1
+      },
+      {
+        "memory": "0-b",
+        "position": {
+          "x": -7.085071637040992,
+          "z": -6.973255461693575,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "collected": 2
+      },
+      {
+        "memory": "0-c",
+        "position": {
+          "x": 8.236818230916551,
+          "z": -20.185266183887634,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "collected": 3
+      },
+      {
+        "memory": "1-a",
+        "position": {
+          "x": 3.8667997251849595,
+          "z": 4.189440274815062,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "collected": 4
+      },
+      {
+        "memory": "1-b",
+        "position": {
+          "x": -7.187502727272934,
+          "z": -4.0675021776428535,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "collected": 5
+      },
+      {
+        "memory": "1-c",
+        "position": {
+          "x": 6.11252695013472,
+          "z": -18.19585590222621,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "collected": 6
+      },
+      {
+        "memory": "2-a",
+        "position": {
+          "x": -3.8703772510958308,
+          "z": 6.021198571938927,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "collected": 7
+      },
+      {
+        "memory": "2-b",
+        "position": {
+          "x": 10.67679751782276,
+          "z": -1.9802308451370016,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "collected": 8
+      },
+      {
+        "memory": "2-c",
+        "position": {
+          "x": -5.675596423498606,
+          "z": -17.752404148889624,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "collected": 9
+      },
+      {
+        "memory": "3-a",
+        "position": {
+          "x": -2.8390337264639887,
+          "z": 5.103326273535988,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "collected": 10
+      },
+      {
+        "memory": "3-b",
+        "position": {
+          "x": -6.883882504749804,
+          "z": -6.856941629893164,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "collected": 11
+      },
+      {
+        "memory": "3-c",
+        "position": {
+          "x": 5.124459411801337,
+          "z": -18.865283546444285,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "collected": 12
       }
     ],
-    "portal": {
-      "x": 7,
-      "z": -8,
-      "next": 1
-    },
-    "drawCalls": 206,
-    "triangles": 1275371,
-    "frameMs": 16.304360961999958,
-    "pixelRatio": 1,
-    "geometries": 48,
-    "textures": 31
+    "saved": [
+      "0-a",
+      "0-b",
+      "0-c",
+      "1-a",
+      "1-b",
+      "1-c",
+      "2-a",
+      "2-b",
+      "2-c",
+      "3-a",
+      "3-b",
+      "3-c"
+    ]
   },
-  "walk": {
-    "initial": {
-      "x": 0,
-      "z": 15,
-      "yaw": 0,
-      "pitch": -0.015
-    },
-    "moved": {
-      "x": 0,
-      "z": 12.059999999999988,
-      "yaw": 0,
-      "pitch": -0.015
-    }
-  },
-  "low": {
-    "worldId": 0,
-    "started": true,
-    "ready": true,
-    "position": {
-      "x": 0,
-      "z": 12.059999999999988,
-      "yaw": 0,
-      "pitch": -0.015
-    },
-    "collected": [],
-    "visited": [
-      0
-    ],
-    "memories": [
+  "controls": {
+    "errors": [],
+    "reports": [
       {
-        "id": "0-a",
-        "x": -4,
-        "z": 4
+        "mobile": false,
+        "initial": {
+          "x": 0,
+          "z": 15,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "moved": {
+          "x": 0,
+          "z": 12.410279999999982,
+          "yaw": 0.4035900000000016,
+          "pitch": -0.015
+        },
+        "looked": {
+          "x": 0,
+          "z": 12.410279999999982,
+          "yaw": 0.7445900000000016,
+          "pitch": -0.24900000000000005
+        },
+        "reset": {
+          "x": 0,
+          "z": 15,
+          "yaw": 0,
+          "pitch": -0.015
+        },
+        "modes": [
+          {
+            "mode": "low",
+            "drawCalls": 262,
+            "triangles": 3443775
+          },
+          {
+            "mode": "high",
+            "drawCalls": 537,
+            "triangles": 13251613
+          },
+          {
+            "mode": "auto",
+            "drawCalls": 537,
+            "triangles": 10311389
+          }
+        ],
+        "health": {
+          "overflow": false,
+          "error": false
+        }
       },
       {
-        "id": "0-b",
-        "x": -8,
-        "z": -9
-      },
-      {
-        "id": "0-c",
-        "x": 10,
-        "z": -21
+        "mobile": true,
+        "initial": {
+          "x": 0,
+          "z": 15,
+          "yaw": -0.2,
+          "pitch": -0.015
+        },
+        "moved": {
+          "x": 0.8314418932056153,
+          "z": 10.898368370765505,
+          "yaw": -0.2,
+          "pitch": -0.015
+        },
+        "looked": {
+          "x": 0.8314418932056153,
+          "z": 10.898368370765505,
+          "yaw": 0.017000000000000043,
+          "pitch": -0.19700000000000004
+        },
+        "reset": {
+          "x": 0,
+          "z": 15,
+          "yaw": -0.2,
+          "pitch": -0.015
+        },
+        "modes": [
+          {
+            "mode": "low",
+            "drawCalls": 159,
+            "triangles": 3186311
+          },
+          {
+            "mode": "high",
+            "drawCalls": 333,
+            "triangles": 11709021
+          },
+          {
+            "mode": "auto",
+            "drawCalls": 176,
+            "triangles": 3186328
+          }
+        ],
+        "health": {
+          "overflow": false,
+          "error": false
+        }
       }
-    ],
-    "portal": {
-      "x": 7,
-      "z": -8,
-      "next": 1
-    },
-    "drawCalls": 185,
-    "triangles": 855470,
-    "frameMs": 18.583363432409385,
-    "pixelRatio": 0.8,
-    "geometries": 48,
-    "textures": 20
-  },
-  "photoBytes": 3852029,
-  "worlds": [
-    {
-      "worldId": 0,
-      "started": true,
-      "ready": true,
-      "position": {
-        "x": 0,
-        "z": 15,
-        "yaw": 0,
-        "pitch": -0.015
-      },
-      "collected": [],
-      "visited": [
-        0
-      ],
-      "memories": [
-        {
-          "id": "0-a",
-          "x": -4,
-          "z": 4
-        },
-        {
-          "id": "0-b",
-          "x": -8,
-          "z": -9
-        },
-        {
-          "id": "0-c",
-          "x": 10,
-          "z": -21
-        }
-      ],
-      "portal": {
-        "x": 7,
-        "z": -8,
-        "next": 1
-      },
-      "drawCalls": 206,
-      "triangles": 1772747,
-      "frameMs": 18.583363432409385,
-      "pixelRatio": 1,
-      "geometries": 49,
-      "textures": 31
-    },
-    {
-      "worldId": 1,
-      "started": true,
-      "ready": true,
-      "position": {
-        "x": 0,
-        "z": 15,
-        "yaw": 0,
-        "pitch": -0.015
-      },
-      "collected": [
-        "0-a",
-        "0-b",
-        "0-c"
-      ],
-      "visited": [
-        0,
-        1
-      ],
-      "memories": [
-        {
-          "id": "1-a",
-          "x": 5,
-          "z": 3
-        },
-        {
-          "id": "1-b",
-          "x": -9,
-          "z": -5
-        },
-        {
-          "id": "1-c",
-          "x": 8,
-          "z": -19
-        }
-      ],
-      "portal": {
-        "x": 7,
-        "z": -8,
-        "next": 2
-      },
-      "drawCalls": 243,
-      "triangles": 1458585,
-      "frameMs": 18.583363432409385,
-      "pixelRatio": 1,
-      "geometries": 40,
-      "textures": 31
-    },
-    {
-      "worldId": 2,
-      "started": true,
-      "ready": true,
-      "position": {
-        "x": 0,
-        "z": 15,
-        "yaw": 0,
-        "pitch": -0.015
-      },
-      "collected": [
-        "0-a",
-        "0-b",
-        "0-c",
-        "1-a",
-        "1-b",
-        "1-c"
-      ],
-      "visited": [
-        0,
-        1,
-        2
-      ],
-      "memories": [
-        {
-          "id": "2-a",
-          "x": -5,
-          "z": 4
-        },
-        {
-          "id": "2-b",
-          "x": 12,
-          "z": -3
-        },
-        {
-          "id": "2-c",
-          "x": -7,
-          "z": -18
-        }
-      ],
-      "portal": {
-        "x": 7,
-        "z": -8,
-        "next": 3
-      },
-      "drawCalls": 229,
-      "triangles": 1722153,
-      "frameMs": 18.583363432409385,
-      "pixelRatio": 1,
-      "geometries": 39,
-      "textures": 31
-    },
-    {
-      "worldId": 3,
-      "started": true,
-      "ready": true,
-      "position": {
-        "x": 0,
-        "z": 15,
-        "yaw": 0,
-        "pitch": -0.015
-      },
-      "collected": [
-        "0-a",
-        "0-b",
-        "0-c",
-        "1-a",
-        "1-b",
-        "1-c",
-        "2-a",
-        "2-b",
-        "2-c"
-      ],
-      "visited": [
-        0,
-        1,
-        2,
-        3
-      ],
-      "memories": [
-        {
-          "id": "3-a",
-          "x": -3,
-          "z": 3
-        },
-        {
-          "id": "3-b",
-          "x": -8,
-          "z": -9
-        },
-        {
-          "id": "3-c",
-          "x": 7,
-          "z": -20
-        }
-      ],
-      "portal": {
-        "x": 7,
-        "z": -8,
-        "next": 0
-      },
-      "drawCalls": 217,
-      "triangles": 853401,
-      "frameMs": 18.583363432409385,
-      "pixelRatio": 1,
-      "geometries": 50,
-      "textures": 34
-    }
-  ],
-  "persistence": true,
-  "portal": true,
-  "touchMovement": true,
-  "mobileOverflow": false,
-  "errors": [],
-  "warnings": [
-    "THREE.WebGLProgram: Program Info Log: (210,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(209,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(210,82-106): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(209,37-61): warning X4122: sum of 1 and -1.66644e-018 cannot be represented accurately in double precision\n(210,82-106): warning X4122: sum of 1 and -1.66644e-018 cannot be represented accurately in double precision\n\n\n\u0000"
-  ]
+    ]
+  }
 }

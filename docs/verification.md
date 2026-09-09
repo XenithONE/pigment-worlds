@@ -1,49 +1,30 @@
-# PIGMENT verification — 2026-09-09
+# Impasto rebuild verification — 2026-09-09
 
-The final local build passed the journey tests, a complete browser traversal, and visual inspection of all four painting worlds. Browser automation reported no page errors or failed resource loads. The exact collected-state evidence is in [browser-verification.json](browser-verification.json).
+The four-world exploration was rebuilt with physical paint layers and poured sheets, continuous half-float brush relief, material-specific pigments, darker coloured folds, grazing light, shadows, GTAO, HDR/MSAA and planar water reflections. The original four worlds and twelve-colour journey remain. This report supersedes the earlier release's rendering measurements.
 
-## Actual browser checks
+## Checks performed
 
-The Codex in-app browser was used first for launch, the initial composition, starting the journey, and the world chooser. Its canvas continuous-key API did not support the required walking sequence, so the bundled Playwright Chromium browser was used for sustained key presses, downloads, reproducible viewport captures, and collection checks. The automation used real keyboard, pointer and button interactions; it only read the development diagnostic snapshot and did not teleport the player or modify collection state.
+- `npm test`: five tests pass, covering malformed saves, duplicate-safe collection/restore, movement limits, swept rock collisions and sliding.
+- `npm run build`: succeeds. Bundled JavaScript is about 725 kB uncompressed / 196 kB gzip. Vite reports its configured 700 kB chunk-size advisory; this is not a failed build.
+- Actual keyboard traversal collected all twelve colours across the four worlds and restored all twelve after reload. The automation read diagnostics to plan routes but used keyboard input to walk and collect; it did not teleport or edit progress.
+- Desktop and touch-viewport controls passed for walking, drag-look, audio on/off, PNG photo download, world selection, low/high/auto quality, motion toggle and return to the entrance.
+- Final integrated art captures cover all four worlds at 1536 × 1024. Mobile captures use 390 × 844. No page/console error, horizontal overflow or error overlay was recorded in these checks.
+- Resource disposal, atlas-loading order and quality-switch behaviour were reviewed independently. Sixty poured-sheet geometry cases passed finite-normal/position and closed-manifold checks; boat geometries passed finite/index checks.
 
-- Desktop at 1536 × 1024, the same dimensions as the generated concept.
-- Mobile viewport at 390 × 844. This is browser viewport testing, not a physical-phone performance claim.
-- Initial loading completes, every sky and portal painting loads, and start removes the large introduction.
-- Holding W changes the player position. Shift plus WASD walks to all 12 pigments through the actual movement loop. Every pigment is collected once.
-- All four worlds open; a nearby frame moves the player from the first world to the second.
-- The complete 12-color journal opens. After reloading, all 12 collected colors are restored.
-- Audio toggles on and off with the correct pressed state. A PNG photo download contains the rendered scene.
-- Low/high quality settings work. Scenery-motion controls work; returning to an entrance resets position.
-- The mobile movement circle changes the player position. World selection, introduction and play views fit without horizontal overflow.
-- Three Node tests pass: malformed save normalization; complete, duplicate-safe collection and restore; movement normalization, frame cap and boundary.
+The in-app browser was used to inspect and operate the actual app. Bundled Playwright Chromium supplemented it for held keys, touch-viewport controls, downloads and repeatable captures. Raw results are summarized in [browser-verification.json](browser-verification.json).
 
-The Windows ANGLE compiler emitted a non-fatal precision warning while compiling Three.js environment-map filtering. No shader program failure or visible missing material occurred. The earlier failed external font requests were fixed by bundling both fonts locally. The earlier variable-loop filter warning was removed by unrolling the paint filter.
+## Actual visual evidence
 
-## Visual comparison and repairs
+[Night](screenshots/world-0.webp) · [Garden](screenshots/world-1.webp) · [Gold](screenshots/world-2.webp) · [Coast](screenshots/world-3.webp) · [Mobile](screenshots/mobile-playing.webp) · [Completed journal](screenshots/journal-complete.webp).
 
-Both [the Image Gen concept](../design/concept.png) and final browser screenshots were opened with `view_image` in the same review pass. Screenshots cover [desktop start](screenshots/start-desktop.webp), [night](screenshots/world-0.webp), [garden](screenshots/world-1.webp), [gold](screenshots/world-2.webp), [coast](screenshots/world-3.webp), [mobile start](screenshots/mobile-start.webp), [mobile play](screenshots/mobile-playing.webp), [mobile chooser](screenshots/mobile-worlds.webp), and [completed journal](screenshots/journal-complete.webp).
+The reference and concept were visually compared with real browser captures throughout the rebuild. Main corrections were: replacing dotted 8-bit height gradients with continuous half-float relief; reducing common blue/ochre marbling on flowers and architecture; grouping and deforming thick foliage; narrowing the trail; adding layered terrain, viscous sheets, real water reflections, textured mountains and more complete boats. Nearby flowers and rocks were also compared at different material settings using the same lights and camera.
 
-| Comparison | Result and repair |
-| --- | --- |
-| Layout and visual hierarchy | Full-bleed explorable scene, logo top left, three quiet controls top right, introduction lower left, portal to the right. Playing removes the introduction and keeps compact progress only. |
-| Visible copy | PIGMENT / 絵の向こうへ / 世界を選ぶ / 音 OFF / ? / 絵の向こうへ、歩いていこう。 / 星のうねり、睡蓮の光。 / 筆のあとに、道がつづく。 / 旅をはじめる / 01 / 04 / 星月夜の丘 are retained. No added marketing badge or section. Mobile replaces the desktop keyboard hint with a touch hint. Loading text disappears after readiness. |
-| Typography | Locally bundled Cormorant Garamond and Noto Serif JP retain the fine serif direction. Mobile logo and navigation were resized so controls stay on one line. |
-| Palette and lighting | Night uses ultramarine and gold; other worlds have distinct mint, gilded ochre and pearly-fog palettes. Dark foreground side faces were lifted with blue/warm fill. |
-| Paint surface and objects | Early planar petals, spear-like leaves and hard geometry were replaced with closed curved daubs, thick petals, rounded rocks and softened architecture. Spatial pigment ridges, clearcoat and painterly filtering unify the objects. |
-| Path | Early dark chips read as gravel. They were replaced by broad, connected gold/ochre palette-knife smears following the path, with actual tapered relief. |
-| Portal and asset treatment | The early sky-only inset was replaced with an original landscape painting of the next world. The geometry remains a traversable gold frame. |
-| Spacing and responsiveness | Desktop edge margins and sparse overlay hierarchy match the design direction. Mobile framing turns slightly toward the portal; touch controls appear only when playing. |
+These captures show the implemented result, not an image-generation mockup. The portfolio cover is the game's own photo output. The image references still have greater landscape intricacy and less procedural repetition; this report does not claim reference-equivalent visual fidelity.
 
-The still concept is not a literal 3D geometry blueprint. The final authored village, vegetation and skies have different exact shapes. The user explicitly requested a stronger viscous-oil treatment after seeing the first playable scene; the final geometry and material revisions follow that direction. These intentional differences, plus game-required journal/loading/settings/touch states, are recorded in [design-system.md](../design/design-system.md). UI composition, wording, typography and interaction hierarchy were checked against the concept; the actual world is an original real-time implementation, not a claimed pixel-identical reproduction of the generated still.
+## Practical limits
 
-## Rendering scope and limits
+The tested renderer was Chromium/ANGLE on an NVIDIA GeForce GTX 1080 Ti. Timing, triangle and draw counts are in the JSON and are observations of this workspace, not guarantees for other devices. Reflecting a scene submits it again; those triangles are included in the measurements. A mobile viewport on this computer is not a physical-phone performance test. Windows ANGLE emitted non-fatal warnings in Three.js environment filtering and AO/shadow compilation, with no shader failure observed.
 
-Spatial cells and three geometry-detail levels preserve rich nearfield daubs while simplifying distant vegetation. The final desktop high-quality spawn captures submitted about 0.85–1.77 million triangles and 206–243 draw calls including postprocessing. These are scene-specific measurements on this computer, not frame-rate guarantees for other devices. The `frameMs` field in the development snapshot is an adaptive-quality hint and is not used as a cross-world benchmark.
+Near vegetation and paint cliffs are three-dimensional; middle-distance botanical detail also uses lit, alpha-cutout crossed planes. Sky and portal paintings are generated images, and distant mountain meshes project part of the sky artwork. Paint relief is an artistic height interpretation, not a measured surface. Water reflection assumes a plane, and flowing paint is animated geometry/shading rather than fluid simulation. Collision proxies cover substantial rocks and trunks, not all scenery or interiors.
 
-The painting effect uses real geometry plus procedural spatial surface detail and an anisotropic low-variance image filter. It approximates the appearance of oil paint; it does not simulate pigment chemistry or viscous fluid dynamics. The skies and portal previews are original generated paintings. Water uses an artistic reflection shader. Terrain-following exploration supports the bridge and world boundary, while general prop collision and interiors are outside this work's scope.
-
-Technical references: [Three.js materials and renderer documentation](https://threejs.org/docs/), [GitHub Pages custom workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
-
-## Publication
-
-The repository includes a GitHub Actions workflow that runs the tests and build before deploying `dist/`. The UNFILED cover comes from the game's actual PNG photo output, compressed as WebP. Live deployment verification is recorded separately after publication.
+Publication and live checks are recorded in [publication.md](publication.md).
