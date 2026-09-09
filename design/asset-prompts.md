@@ -1,0 +1,31 @@
+# PIGMENT sky asset prompts
+
+Generated on 2026-09-09 with the built-in image_gen tool, one independent call per asset. No CLI or external painting reproductions were used. The originals remain in the default generated-images directory; these production copies are checked into design/source-images/.
+
+All four PNGs are 1774 × 887 pixels (2:1), RGB, full bleed. Each was inspected with view_image: no visible text, UI, frames or foreground structures. Oil paint texture and distinct palettes were retained. These are art-directed panorama plates, not mathematically calibrated spherical captures. Left and right edge colors are compatible but the pixel edges are not guaranteed seamless; runtime seam blending or careful dome mapping is recommended. Low horizons are intentional because runtime 3D landscapes provide the foreground.
+
+## design/source-images/starry-sky.png
+
+Use case: stylized-concept.
+Asset type: production sky panorama texture for a real-time three-dimensional painting exploration game.
+Create an original full-bleed oil painting sky panorama, 2:1 wide landscape aspect ratio, 2048 by 1024 if possible. A magnificent ultramarine and cobalt starry night inspired by Vincent van Gogh's swirling impasto brushwork. Enormous flowing sweeping cobalt and pale blue currents of sky; luminous golden stars of different sizes; one large warm crescent moon in the upper right. Rich hand-painted pigment, thick individually visible expressive brushstrokes, subtle canvas grain. The panorama should feel alive and immersive, with convincing painterly depth and very high artistic finish. The sky occupies at least 88 percent of the canvas, with only a very low strip of distant dark blue rolling hills along the bottom edge. No foreground objects. This is a horizontally wrapping sky texture: left and right edges have compatible continuous color and brush movement without strong recognizable shapes directly on either edge. No text, lettering, UI, border, frame, watermark, signature, buildings, water, or foreground trees. Do not reproduce the composition of an existing painting. Flat rectangular sky panorama image, not a photo of a painting.
+
+## design/source-images/garden-sky.png
+
+Use case: stylized-concept.
+Asset type: production sky panorama texture for a real-time three-dimensional painting exploration game.
+Create an original full-bleed oil painting sky panorama, 2:1 wide landscape aspect ratio, 2048 by 1024 if possible. A magnificent softly luminous pale turquoise summer sky above a misty willow garden, inspired by Claude Monet's impressionist oil brushwork and color sensitivity. Pale turquoise and duck egg blue sky with gently drifting peach, pearl, rose and lilac clouds. Subtle shifting warm sunlight in painterly atmosphere. Medium and small expressive dabs of layered oil pigment with visible tactile brushwork, subtle canvas grain, very high artistic finish. Sky fills at least 90 percent of the image; the distant garden is only a thin low misty strip of cool sage, lavender and blue-green willow silhouettes at the bottom edge. NO close trees, flowers or other foreground. This is a horizontally wrapping sky texture: left and right edges have compatible continuous color and soft clouds without strong recognizable shapes directly on either edge. No text, lettering, UI, border, frame, watermark, signature, buildings, or foreground water. Do not reproduce any existing painting's composition. Flat rectangular sky panorama image, not a photo of a painting.
+
+## design/source-images/golden-sky.png
+
+Use case: stylized-concept.
+Asset type: production sky panorama texture for a real-time three-dimensional painting exploration game.
+Create an original full-bleed oil painting sky panorama, 2:1 wide landscape aspect ratio, 2048 by 1024 if possible. A breathtaking golden dusk sky inspired by Gustav Klimt's gilded decorative painting, translated into an atmospheric vast open sky. Ochre, burnished golden yellow and soft amber light, delicate mosaic-like irregular golden painted flecks embedded in broad sweeping cloud shapes, expressive impasto oil textures with subtle genuine gold leaf luster. One modest small patterned golden sun surrounded by quiet luminous haze in the upper right part of the sky. The gold detailing is elegant and organic, not a regular tessellated wallpaper. Very high artistic finish. Sky fills at least 90 percent of the image; a thin strip of low rolling distant dark teal hills hugs the bottom edge. No foreground objects. Horizontally wrapping sky texture: the left and right edges have compatible continuous colors and cloud movement without strong recognizable shapes on either edge. No text, lettering, UI, border, frame, watermark, signature, figures, buildings, water, or foreground trees. Do not reproduce any existing painting's composition. Flat rectangular sky panorama image, not a photo of a painting.
+
+## design/source-images/mist-sky.png
+
+Use case: stylized-concept.
+Asset type: production sky panorama texture for a real-time three-dimensional painting exploration game.
+Create an original full-bleed oil painting sky panorama, 2:1 wide landscape aspect ratio, 2048 by 1024 if possible. An extraordinary luminous ivory, pale gold and apricot foggy seascape sky inspired by J. M. W. Turner's atmospheric oil painting, almost abstract yet full of depth. Vast light-filled mist, translucent veils of warm white and peach, restrained lilac-gray and pale blue cloud shadows, diffuse glowing sun dissolved into haze, expressive broad translucent brushed layers mixed with delicate impasto catches of light. Subtle painterly pigment and canvas grain, not photographic fog or a digital smooth gradient. Very high artistic finish. At least 96 percent sky and glowing fog. A nearly invisible distant horizon is only along the lowest edge, a faint pale slate line melting into mist; no visible foreground water or waves. This is a horizontally wrapping sky texture: both side edges have compatible subtle light colors and vague mist with no distinct objects. No text, lettering, UI, border, frame, watermark, signature, figures, ships, buildings, birds, trees or foreground objects. Do not reproduce an existing painting's composition. Flat rectangular sky panorama image, not a photo of a painting.
+
+

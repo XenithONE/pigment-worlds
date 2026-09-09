@@ -1,0 +1,6 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createJourney,sanitizeSave,moveOnGround} from '../src/simulation/journey.js';
+test('saved data rejects unknown, duplicate and malformed progress',()=>{assert.deepEqual(sanitizeSave({collected:['0-a','0-a','4-a',null,'3-c'],visited:[0,0,3,-1,4,'2']}),{version:1,collected:['0-a','3-c'],visited:[0,3]});assert.deepEqual(sanitizeSave(null),{version:1,collected:[],visited:[]});});
+test('all twelve colors are reachable in state without duplicates after restore',()=>{const j=createJourney();for(let w=0;w<4;w++){j.visit(w);for(const c of ['a','b','c'])assert.equal(j.collect(`${w}-${c}`),true);}assert.equal(j.collect('0-a'),false);const restored=createJourney(JSON.parse(JSON.stringify(j.state)));assert.equal(restored.state.collected.length,12);assert.equal(restored.count(3),3);assert.equal(restored.state.visited.length,4);});
+test('movement normalizes diagonal speed, caps long frames and preserves boundary',()=>{const p={x:0,z:0},a=moveOnGround(p,0,1,0,.05),b=moveOnGround(p,0,1,1,.05);assert.ok(a.z<0);assert.ok(Math.abs(Math.hypot(a.x,a.z)-Math.hypot(b.x,b.z))<1e-12);assert.deepEqual(moveOnGround(p,0,1,0,3),a);const c=moveOnGround({x:58,z:0},0,0,1,.05);assert.ok(Math.hypot(c.x,c.z)<=58);});
