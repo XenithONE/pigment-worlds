@@ -7,6 +7,8 @@ import { addPaintedFlora } from './painted-flora.js';
 import { addPaintedVessels } from './vessel-scenery.js';
 import { addPaintValley, valleyHeight, valleyRiverContains } from './paint-valley.js';
 import { addBotanicalSculptures } from './botanical-sculptures.js';
+import { addSculptedCanyon, canyonHeight, canyonRiverContains } from './sculpted-canyon.js';
+import { addPaintedTree } from './painted-tree.js';
 
 // The scenery is original, traversable geometry. Generated paintings supply the
 // sky panoramas; small, instanced impasto marks make up the living foreground.
@@ -14,7 +16,7 @@ const TAU = Math.PI * 2;
 const PALETTES = [
   { ground: ['#1c3556', '#274365', '#314c6c', '#49516a'], path: ['#9c8860', '#c3a66c', '#d3bb82'], leaf: ['#254f67', '#32627b', '#416c8a', '#5c7e91', '#9b9f73'], flower: ['#e9bc39', '#fbd56d', '#497ac4', '#668ecb', '#c2c9cb'], sky: '#10265a', fog: '#33466d', light: '#a1b9ff', sun: '#ffe7ab', water: '#224c76' },
   { ground: ['#567756', '#6e8b5f', '#75916a', '#91a07d'], path: ['#a49b80', '#c0b193', '#d3c9a9'], leaf: ['#577f4a', '#80a667', '#8eac61', '#b4c582', '#407455'], flower: ['#f3d9d4', '#e6a4c1', '#d2bee0', '#eef0de', '#aea8df'], sky: '#b4c8c8', fog: '#a6b9a0', light: '#ecf6e3', sun: '#fff1c7', water: '#609591' },
-  { ground: ['#8a7034', '#88753b', '#aa8d46', '#aa994f'], path: ['#b59653', '#d0b169', '#d4c082'], leaf: ['#ad7e23', '#dfb44b', '#f0cb6a', '#a97c34', '#f3d596'], flower: ['#e3b947', '#f1d284', '#b86147', '#f0ebce', '#703f53'], sky: '#c5ad77', fog: '#c2ab76', light: '#fff2c9', sun: '#ffe8a4', water: '#968657' },
+  { ground: ['#596166', '#847b64', '#b09668', '#baab84'], path: ['#b59653', '#d0b169', '#d4c082'], leaf: ['#8d6b38', '#b69442', '#d1b366', '#986949', '#c9bd84'], flower: ['#d0a746', '#e5ca84', '#b65e47', '#e3ddbd', '#703f53'], sky: '#b0b9bd', fog: '#91a9b6', light: '#d9e6ee', sun: '#fff0d2', water: '#28576e' },
   { ground: ['#777b79', '#717d7d', '#93927f', '#999787'], path: ['#bcb19a', '#c3bda6', '#ded4b4'], leaf: ['#727e69', '#94997a', '#a6a785', '#888d74', '#bdbaa0'], flower: ['#ede8d4', '#c9b59c', '#9cabc2', '#cbcad1', '#ddb875'], sky: '#c4cdcc', fog: '#bfc8c6', light: '#f1f0df', sun: '#ffeac4', water: '#779ca3' },
 ];
 
@@ -148,6 +150,7 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
   const goldMat = painted(['#cf9b44', '#edbd61', '#ffe5a0', '#bf8f42'], .44); goldMat.metalness = .22; goldMat.emissive.set('#9b6923'); goldMat.emissiveIntensity = .26;
   const darkGoldMat = material(new THREE.MeshStandardMaterial({ color: '#715324', roughness: .5, metalness: .68 }));
   for (const [mat, surface] of [[groundMat, 'ground'], [pathMat, 'path'], [barkMat, 'bark'], [brushMat, 'foliage'], [goldMat, 'gold'], [darkGoldMat, 'gold']]) { mat.name = `pigment-${surface}`; mat.userData.pigmentSurface = surface; }
+  if(id===2){ groundMat.map=null;groundMat.bumpMap=null;groundMat.vertexColors=true;groundMat.userData.pigmentSurface='canyon'; }
   const strokeGeo = geo(makeStrokeGeometry()), leafGeo = geo(makeLeafGeometry()), petalGeo = geo(makePetalGeometry());
   const grassGeo = geo(makeGrassBladeGeometry());
   const detailGeometry = new Map([
@@ -170,7 +173,8 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
   }
   function stamp(name, geometry, mat, x, y, z, sx, sy, sz, rx, ry, rz, col, groundGrowth = false) {
     if (groundGrowth && groundGrowthGap(x, z)) return;
-    if (name === 'grass' && (id === 0 || id === 1)) geometry = grassGeo;
+    if (name === 'grass' && id !== 3) geometry = grassGeo;
+    if (id === 2 && ['flowers','flower-stems','pollen'].includes(name)) { sx*=.64;sy*=.72;sz*=.64; }
     const key = spatialBatches.has(name) ? `${name}:${Math.floor(x / 12)},${Math.floor(z / 12)}` : name;
     if (!batches.has(key)) batches.set(key, { name, key, geometry, mat, items: [] });
     batches.get(key).items.push([x, y, z, sx, sy, sz, rx, ry, rz, col]);
@@ -205,7 +209,7 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
     }
     if (id === 3) return .25 + Math.sin(x * .07 + z * .08) * .55 + .25 * Math.sin(z * .2) + smoothstep(-9, 18, x) * 1.3 + shoulder * (hill(19, 5, 13, 4.5) + hill(31, -35, 20, 7));
     const ripple = .35 + Math.sin(x * .085) * .45 + Math.sin(z * .09) * .43 + Math.sin(x * .16 + z * .12) * .2;
-    if (id === 2) return ripple + shoulder * (hill(-13, -3, 15, 2.8) + hill(23, -21, 19, 4.6) + hill(-28, -53, 22, 6));
+    if (id === 2) return canyonHeight(x,z);
     return valleyHeight(x,z,pathX);
   }
   function groundHeight(x, z) {
@@ -215,14 +219,26 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
   const portal = { x: 7, z: -8, next: (id + 1) % 4 };
   // smoothstep is increasing; this explicit blend keeps the traversable trail
   // visually connected to the frame in all four worlds.
-  function pathX(z) { const t = THREE.MathUtils.clamp((15 - z) / 24, 0, 1); return Math.sin(t * Math.PI) * -1.4 + 7 * t; }
-  function isPond(x, z) { return id === 0 ? valleyRiverContains(x,z,pathX)||((x - 6) / 20) ** 2 + ((z + 54) / 25) ** 2 < .82 : id === 1 && ((x + 12) / 14) ** 2 + ((z + 5) / 19) ** 2 < 1; }
+  function pathX(z) { const t = THREE.MathUtils.clamp((15 - z) / 24, 0, 1); return Math.sin(t * Math.PI) * -1.4 + 7 * t - (id===2?3.5*(1-t)**2:0); }
+  function isPond(x, z) { return id === 2 ? canyonRiverContains(x,z) : id === 0 ? valleyRiverContains(x,z,pathX)||((x - 6) / 20) ** 2 + ((z + 54) / 25) ** 2 < .82 : id === 1 && ((x + 12) / 14) ** 2 + ((z + 5) / 19) ** 2 < 1; }
   function isSea(x, z) { return id === 3 && x < -8.5 + Math.sin(z * .095) * 2; }
-  const terrain = new THREE.PlaneGeometry(220, 220, 240, 240); terrain.rotateX(-Math.PI / 2);
+  const terrain = new THREE.PlaneGeometry(220, 220, id===2?420:240, id===2?420:240); terrain.rotateX(-Math.PI / 2);
   const pos = terrain.attributes.position, colors = [];
   const c1 = new THREE.Color(p.ground[1]), c2 = new THREE.Color(p.ground[3]);
   for (let i = 0; i < pos.count; i++) { const x = pos.getX(i), z = pos.getZ(i); let y = baseHeight(x, z); if (id === 1 && isPond(x, z)) y = -.58; if (isSea(x, z)) y = -3.2; pos.setY(i, y); color.copy(c1).lerp(c2, .5 + .25 * Math.sin(x * .3) * Math.sin(z * .27)); colors.push(color.r, color.g, color.b); }
+  if(id===2){
+    const rockColors=['#174b60','#296979','#9b773f','#c69749','#d4b36f','#63818a'].map(c=>new THREE.Color(c));
+    for(let i=0;i<pos.count;i++){
+      const x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i),phase=y*.41+Math.sin(z*.14)*.7+Math.sin(x*.29)*.45;
+      const band=Math.floor(phase),fraction=phase-band;
+      color.copy(rockColors[((band%6)+6)%6]).lerp(rockColors[(((band+1)%6)+6)%6],smoothstep(.74,1,fraction));
+      const exposed=smoothstep(15,22,x)+smoothstep(-15,-26,x);
+      if(exposed<.2)color.set('#93866b').lerp(new THREE.Color('#305969'),.18+.15*Math.sin(x*.74+z*.53));
+      colors[i*3]=color.r;colors[i*3+1]=color.g;colors[i*3+2]=color.b;
+    }
+  }
   terrain.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3)); terrain.computeVertexNormals(); const terrainMesh = mesh(terrain, groundMat); terrainMesh.receiveShadow = true;
+  if(id===2) terrainMesh.name='sculpted-canyon-topography';
   // A wide, gently meandering ribbon is tessellated against the actual ground.
   const pathVertices = [], pathUV = [], pathIndices = [], pathColumns = 15;
   for (let i = 0; i <= 280; i++) {
@@ -261,10 +277,11 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
     const ga = random() * TAU, gr = Math.sqrt(random()) * growthRadius, x = growthX + Math.cos(ga) * gr, z = growthZ + Math.sin(ga) * gr, distance = Math.hypot(x, z - 10);
     const pathDistance = Math.abs(x - pathX(z));
     if (distance > 68 || pathDistance < 1.42 || isPond(x, z) || isSea(x, z)) continue;
+    if(id===2 && Math.hypot((baseHeight(x+.2,z)-baseHeight(x-.2,z))/.4,(baseHeight(x,z+.2)-baseHeight(x,z-.2))/.4)>1)continue;
     // Plants newly admitted beside the narrower path use an independent stream.
     // Existing placement/obstacle randomness is therefore exactly preserved.
     const plantRandom = pathDistance < 1.87 ? edgeGrowthRandom : random;
-    const sculptedNear = (id === 0 || id === 1) && z > -20 && z < 25 && pathDistance < 9;
+    const sculptedNear = id !== 3 && z > -20 && z < 25 && pathDistance < 9;
     // Keep the placement stream stable while replacing the repeated foreground
     // blossoms with complete sculpted plants and finer undergrowth.
     const stampGrowth = (...args) => {
@@ -378,7 +395,7 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
     }
     stamp(...args);
   };
-  addSculptedScenery({ id, scene, random, baseHeight, pathX, isPond, isSea, mesh, painted, material, mergeParts, transform, tube, goldMat, stamp:stampScenery, leafGeo, petalGeo, brushMat, stemGeo, p, obstacles, clearingPositions, skyTextures, textures });
+  if (id !== 2) addSculptedScenery({ id, scene, random, baseHeight, pathX, isPond, isSea, mesh, painted, material, mergeParts, transform, tube, goldMat, stamp:stampScenery, leafGeo, petalGeo, brushMat, stemGeo, p, obstacles, clearingPositions, skyTextures, textures });
   for (let i = 0; i < (id === 3 ? 35 : 45); i++) {
     const z = (random() - .5) * 120 - 8, x = id === 3 ? -9 + Math.sin(z * .095) * 2 + (random() - .5) * 4 : (random() < .5 ? -1 : 1) * (4 + random() * 35);
     if (Math.abs(x - pathX(z)) < 3 || isPond(x, z)) continue;
@@ -436,26 +453,7 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
     }
     for (let i = 0; i < 1900; i++) { const x = -12 + (random() - .5) * 27, z = -5 + (random() - .5) * 38; if (!isPond(x, z)) continue; stamp('pond-brush-marks', strokeGeo, brushMat, x, -.105, z, .1 + random() * .2, .25 + random() * .85, .05, -Math.PI / 2, 0, Math.PI / 2 + (random() - .5) * .2, ['#9faec0', '#c9c6b8', '#81a7a1', '#bdc5a3'][i % 4]); }
   } else if (id === 2) {
-    const birchParts = [], blackMat = material(new THREE.MeshStandardMaterial({ color: '#67583e', roughness: 1 }));
-    const birches = [];
-    for (let i = 0; i < 42; i++) {
-      const x = (random() - .5) * 103, z = 17 - random() * 80;
-      if (Math.abs(x - pathX(z)) < 6 || Math.hypot(x - 7, z + 8) < 6) continue;
-      const h = 13 + random() * 10, radius = .22 + random() * .25, t = organicTrunk(x, z, h, radius, (random() - .5) * .9, birchParts); birches.push(t);
-      for (let j = 0; j < 15; j++) { const yy = t.y + .3 + random() * h, a = random() * TAU; stamp('birch-bark', strokeGeo, blackMat, x + Math.cos(a) * radius * .95, yy, z + Math.sin(a) * radius * .95, radius * 1.8, .08 + random() * .09, .05, 0, -a + Math.PI / 2, (random() - .5) * .2, '#ffffff'); }
-      for (let j = 0; j < 440; j++) {
-        const a = random() * TAU, rr = Math.sqrt(random()) * (3 + random()), yy = t.y + h * .63 + random() * h * .4;
-        stamp('gold-canopy', leafGeo, brushMat, x + Math.cos(a) * rr, yy, z + Math.sin(a) * rr, .9 + random() * .8, .7 + random() * 1.0, 1.2, random() * TAU, random() * TAU, random() * TAU, p.leaf[j % p.leaf.length]);
-      }
-    }
-    mergeParts(birchParts, barkMat);
-    // The signature mosaic grove has jewel-toned circles embedded in gold leaves.
-    const circleGeo = geo(new THREE.RingGeometry(.075, .13, 12));
-    for (let i = 0; i < 650; i++) {
-      const x = (random() < .5 ? -1 : 1) * (8 + random() * 30), z = 8 - random() * 50, y = baseHeight(x, z) + .4 + random() * .8;
-      stamp('mosaic-gold', circleGeo, goldMat, x, y, z, 1.2, 1.2, 1.2, (random() - .5) * .5, random() * TAU, random() * TAU, '#ffffff');
-    }
-    [[-15, -9, 11, 4.8], [17, -25, 13, 5.3], [-28, 9, 12, 5], [30, -9, 14, 5.5]].forEach(v => broadTree(...v));
+    // The red-gold tree and connected canyon replace the former birch grove.
   } else {
     water(-80, -24, 152, 190, -1.9);
     [[27, 5, 9, 4], [32, -20, 10, 4.5], [21, -39, 12, 4.5], [40, -45, 14, 5]].forEach(v => broadTree(...v));
@@ -555,6 +553,9 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
   scene.add(new THREE.Points(particleGeo, particleMat)); animated.push(time => { particleMat.uniforms.uTime.value = reducedMotion ? 0 : time; });
   const removePaintedFlora = addPaintedFlora(scene, { id, baseHeight, pathX, isPond, isSea });
   const removePaintValley = addPaintValley(scene,{id,pathX,baseHeight});
+  const canyon = id === 2 ? addSculptedCanyon(scene) : null;
+  const heroTree = id === 2 ? addPaintedTree(scene,{position:[-8.5,baseHeight(-8.5,-3),-3],seed:5921,scale:.9}) : null;
+  if(heroTree) obstacles.push({x:-8.5,z:-3,radius:1.5});
   const removeBotanicals = addBotanicalSculptures(scene,{id,baseHeight,pathX,isPond,isSea,density:1.7});
   flush();
 
@@ -574,7 +575,7 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
   }
 
   return {
-    scene, groundHeight, spawn: { x: 0, z: 15, yaw: 0 }, portal, memories, memoryMeshes, obstacles,
+    scene, groundHeight, spawn: { x: id===2?-3.5:0, z: 15, yaw: id === 2 ? .08 : 0, pitch:id===2?.035:-.015 }, portal, memories, memoryMeshes, obstacles,
     setReducedMotion(value) { reducedMotion = Boolean(value); },
     setDetailLevel(value) { detailLevel = ['auto', 'low', 'high'].includes(value) ? value : 'auto'; lastDetailUpdate = -Infinity; },
     update(time, delta, camera) {
@@ -582,7 +583,7 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
       if (reducedMotion || Math.abs(time - lastDetailUpdate) > .18) { updateDetail(camera); lastDetailUpdate = time; }
     },
     dispose() {
-      removePaintedFlora();removePaintValley();removeBotanicals();
+      removePaintedFlora();removePaintValley();removeBotanicals();canyon?.dispose();heroTree?.dispose();
       geometries.forEach(g => g.dispose()); materials.forEach(m => m.dispose()); textures.forEach(t => t.dispose());
       scene.traverse(obj => { if (obj.isInstancedMesh) obj.dispose(); }); scene.clear();
     },

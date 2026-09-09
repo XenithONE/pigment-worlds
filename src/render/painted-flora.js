@@ -139,6 +139,7 @@ export function addPaintedFlora(scene, { id = 0, baseHeight, pathX, isPond = () 
       if (fromSpawn < 8 || fromSpawn > 45 || pathDistance < 1.95 + width * .5) continue;
       if (Math.hypot(px - 7, pz + 8) < 3.8 || clearingPositions.some(([mx, mz]) => Math.hypot(px - mx, pz - mz) < 1.6)) continue;
       if (isPond(px, pz) || isSea(px, pz) || isPond(px - width * .5, pz) || isPond(px + width * .5, pz) || isSea(px - width * .5, pz)) continue;
+      if(id===2 && Math.hypot((baseHeight(px+.2,pz)-baseHeight(px-.2,pz))/.4,(baseHeight(px,pz+.2)-baseHeight(px,pz-.2))/.4)>1)continue;
       const y = baseHeight(px, pz);
       if (!Number.isFinite(y)) continue;
       const key = `${Math.floor(px / 12)},${Math.floor(pz / 12)}`;

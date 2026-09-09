@@ -1,0 +1,268 @@
+{
+  "sourceSHA256": "7b8f151fd0245355a4812e29573c8b2c1b7e242463e40053dbf2a16258a337a7",
+  "finite": true,
+  "nonUnitNormals": 0,
+  "degenerateTriangles": 0,
+  "triangles": 466480,
+  "faces": [
+    {
+      "name": "canyon-near-continuous-paint-face",
+      "triangles": 108800,
+      "facingFailures": 0,
+      "worstFacing": 0.012999664747679494,
+      "area": 1517.7292923500333,
+      "buriedAnalyticArea": 55.10158683959775,
+      "buriedTerrainMeshArea": 50.31615644764516,
+      "aboveWaterArea": 1158.595588117318,
+      "aboveWaterExposedArea": 1158.595588117318,
+      "aboveWaterBuriedArea": 0,
+      "outsideTerrainArea": 71.85096992852324,
+      "dyRange": [
+        -0.15687085257636202,
+        5.294812880060508
+      ],
+      "meshDyRange": [
+        -0.25476451532665845,
+        5.149638191432114
+      ],
+      "worstBuried": {
+        "center": [
+          -14.506497065226236,
+          2.5306661128997803,
+          -11.666666666666666
+        ],
+        "dy": -0.25476451532665845,
+        "analyticalDy": -0.11933388710021964,
+        "u": 0.9656862616539001
+      },
+      "worstAboveWaterBuried": null,
+      "bins": [
+        {
+          "area": 88.1764989724688,
+          "withinTerrainArea": 80.34238945165949,
+          "buried": 0
+        },
+        {
+          "area": 95.63667858685801,
+          "withinTerrainArea": 87.36892481122963,
+          "buried": 0
+        },
+        {
+          "area": 150.71356566641288,
+          "withinTerrainArea": 142.78757306572805,
+          "buried": 0
+        },
+        {
+          "area": 180.20714818121422,
+          "withinTerrainArea": 173.01248289994223,
+          "buried": 0
+        },
+        {
+          "area": 221.3980404595916,
+          "withinTerrainArea": 211.6248539076252,
+          "buried": 0
+        },
+        {
+          "area": 227.5463630820052,
+          "withinTerrainArea": 218.11087886680446,
+          "buried": 0
+        },
+        {
+          "area": 197.97954231309635,
+          "withinTerrainArea": 190.84688986170522,
+          "buried": 0
+        },
+        {
+          "area": 178.3400589951047,
+          "withinTerrainArea": 172.0811932695988,
+          "buried": 1.2248496701818965
+        },
+        {
+          "area": 116.57009090296133,
+          "withinTerrainArea": 112.25780359828848,
+          "buried": 10.82404210604759
+        },
+        {
+          "area": 61.1613051903261,
+          "withinTerrainArea": 57.44533268893412,
+          "buried": 38.267264671415596
+        }
+      ]
+    },
+    {
+      "name": "canyon-far-continuous-paint-face",
+      "triangles": 108800,
+      "facingFailures": 0,
+      "worstFacing": 0.007468545317316584,
+      "area": 3218.4335930299803,
+      "buriedAnalyticArea": 91.22440906090803,
+      "buriedTerrainMeshArea": 120.51981768156661,
+      "aboveWaterArea": 2708.1828680558747,
+      "aboveWaterExposedArea": 2707.204965307004,
+      "aboveWaterBuriedArea": 0.8061581533061528,
+      "outsideTerrainArea": 313.6553290453328,
+      "dyRange": [
+        -0.7670014728709109,
+        11.13535984875471
+      ],
+      "meshDyRange": [
+        -1.453884435408187,
+        11.071863926336023
+      ],
+      "worstBuried": {
+        "center": [
+          -26.42651112874349,
+          -0.595123827457428,
+          9.083333333333332
+        ],
+        "dy": -1.453884435408187,
+        "analyticalDy": -0.7090879798234311,
+        "u": 0.9950980345408121
+      },
+      "worstAboveWaterBuried": {
+        "center": [
+          -27.510608673095703,
+          0.49047846595446265,
+          6.666666666666666
+        ],
+        "dy": -0.32151873935388,
+        "analyticalDy": 0.28460163765217245,
+        "u": 0.8578431208928426
+      },
+      "bins": [
+        {
+          "area": 147.22612598882222,
+          "withinTerrainArea": 134.6325971777011,
+          "buried": 0
+        },
+        {
+          "area": 171.1247556918044,
+          "withinTerrainArea": 155.13200140044913,
+          "buried": 0
+        },
+        {
+          "area": 309.07650215364686,
+          "withinTerrainArea": 279.54819994613933,
+          "buried": 0
+        },
+        {
+          "area": 388.03691643439197,
+          "withinTerrainArea": 350.3531719063508,
+          "buried": 0
+        },
+        {
+          "area": 484.73640464630853,
+          "withinTerrainArea": 436.9254334228208,
+          "buried": 0
+        },
+        {
+          "area": 505.599759328476,
+          "withinTerrainArea": 455.424059378565,
+          "buried": 0
+        },
+        {
+          "area": 443.27977828303216,
+          "withinTerrainArea": 399.5492351490541,
+          "buried": 0
+        },
+        {
+          "area": 400.8953247589097,
+          "withinTerrainArea": 361.24815581728706,
+          "buried": 0
+        },
+        {
+          "area": 258.551422300305,
+          "withinTerrainArea": 232.89606708434923,
+          "buried": 27.220851595026623
+        },
+        {
+          "area": 109.90660344429138,
+          "withinTerrainArea": 99.0693427019391,
+          "buried": 93.29896608654032
+        }
+      ]
+    },
+    {
+      "name": "continuous-viscous-canyon-river",
+      "triangles": 172800,
+      "facingFailures": 0,
+      "worstFacing": 0.5330702123240716,
+      "area": 0,
+      "buriedAnalyticArea": 0,
+      "buriedTerrainMeshArea": 0,
+      "aboveWaterArea": 0,
+      "aboveWaterExposedArea": 0,
+      "aboveWaterBuriedArea": 0,
+      "outsideTerrainArea": 0,
+      "dyRange": [
+        null,
+        null
+      ],
+      "meshDyRange": [
+        null,
+        null
+      ],
+      "worstBuried": null,
+      "worstAboveWaterBuried": null,
+      "bins": [
+        {
+          "area": 0,
+          "withinTerrainArea": 0,
+          "buried": 0
+        },
+        {
+          "area": 0,
+          "withinTerrainArea": 0,
+          "buried": 0
+        },
+        {
+          "area": 0,
+          "withinTerrainArea": 0,
+          "buried": 0
+        },
+        {
+          "area": 0,
+          "withinTerrainArea": 0,
+          "buried": 0
+        },
+        {
+          "area": 0,
+          "withinTerrainArea": 0,
+          "buried": 0
+        },
+        {
+          "area": 0,
+          "withinTerrainArea": 0,
+          "buried": 0
+        },
+        {
+          "area": 0,
+          "withinTerrainArea": 0,
+          "buried": 0
+        },
+        {
+          "area": 0,
+          "withinTerrainArea": 0,
+          "buried": 0
+        },
+        {
+          "area": 0,
+          "withinTerrainArea": 0,
+          "buried": 0
+        },
+        {
+          "area": 0,
+          "withinTerrainArea": 0,
+          "buried": 0
+        }
+      ]
+    }
+  ],
+  "disposal": {
+    "geometryCount": 10,
+    "materialCount": 9,
+    "allGeometryOnce": true,
+    "allMaterialOnce": true,
+    "sceneEmpty": true
+  }
+}

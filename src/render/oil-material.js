@@ -56,6 +56,7 @@ const profiles = {
   // Brush relief is independent: leaves can retain their green mass without
   // inheriting the blue-and-ochre palette used for broad mixed paint banks.
   ground:       { scale: [.30, .22, .30], depth: .045, pigment: .26, color: [.18, .10, .25], fold: .40, roughness: .50, coat: .32 },
+  canyon:       { scale: [.45, .32, .45], depth: .042, pigment: .05, color: [0, 0, .20], fold: .30, roughness: .62, coat: .24 },
   path:         { scale: [.17, .17, .17], depth: .070, pigment: .56, color: [.37, .27, .34], fold: .55, roughness: .40, coat: .62, glaze: .16 },
   rock:         { scale: [.26, .19, .26], depth: .095, pigment: .62, color: [.43, .34, .38], fold: .70, roughness: .40, coat: .62, glaze: .16 },
   bark:         { scale: [.62, .16, .62], depth: .060, pigment: .14, color: [.04, .035, .18], fold: .40, roughness: .47, coat: .36 },
@@ -101,7 +102,7 @@ export function applyOilMaterials(scene) {
     const coat = original => {
       if (!original?.isMeshStandardMaterial) return original;
       // Flowing paint water owns a separate physical shader and its uniforms.
-      if (original.userData.pigmentSurface === 'liquid') return original;
+      if (original.userData.pigmentSurface === 'liquid' || original.userData.preservePaintColor) return original;
       const surface = surfaceFor(object, original), profile = profiles[surface];
       const moving = surface === 'foliage' && /grass|flower|foliage|tree-pigment|canopy|willow/i.test(object.name);
       if (!coatings.has(original)) coatings.set(original, new Map());

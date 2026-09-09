@@ -6,6 +6,7 @@ import { applyOilMaterials, loadOilPaintTexture } from './render/oil-material.js
 import { applySculptedRelief } from './render/surface-relief.js';
 import { loadPaintedFloraAtlas } from './render/painted-flora.js';
 import { loadPaintedVistas, addPaintedVistas } from './render/painted-vistas.js';
+import { loadCanyonVista, addCanyonVista } from './render/canyon-vista.js';
 import { WORLD_INFO, SAVE_KEY, createJourney, moveOnGround } from './simulation/journey.js';
 import { slideAroundPaint } from './simulation/collision.js';
 import { constrainTerrainStep } from './simulation/terrain-walk.js';
@@ -78,7 +79,8 @@ function startJourney(){
   canvas.tabIndex=0;canvas.focus({preventScroll:true});
 }
 function resetPosition(){
-  runtime.x=world.spawn.x;runtime.z=world.spawn.z;runtime.yaw=(world.spawn.yaw||0)-(touchDevice()?.2:0);runtime.pitch=-.015;
+  runtime.x=world.spawn.x;runtime.z=world.spawn.z;runtime.yaw=(world.spawn.yaw||0)-(touchDevice()?.2:0);runtime.pitch=world.spawn.pitch??-.015;
+  camera.fov=touchDevice()?67:runtime.worldId===2?65:59;camera.updateProjectionMatrix();
   camera.position.set(runtime.x,world.groundHeight(runtime.x,runtime.z)+1.8,runtime.z);camera.rotation.set(runtime.pitch,runtime.yaw,0,'YXZ');
   clearInput();
 }
@@ -87,12 +89,13 @@ function setWorld(id){
   const previous=world;
   world=createWorld(id,{skyTextures,portalTextures,reducedMotion});
   const vista=addPaintedVistas(world.scene,{id});
+  const canyonVista=id===2?addCanyonVista(world.scene):null;
   if(id===0||id===1) world.scene.traverse(object=>{
     const materials=Array.isArray(object.material)?object.material:[object.material];
     if(object.name.startsWith('mountain-range-')||(id===0&&(object.name.startsWith('castle-')||object.name.startsWith('village-windows')||materials.some(m=>m?.name?.startsWith('village-painted-'))))) object.visible=false;
   });
   const disposeWorld=world.dispose;
-  world.dispose=()=>{vista.dispose();disposeWorld();};
+  world.dispose=()=>{vista.dispose();canyonVista?.dispose();disposeWorld();};
   world.relief=applySculptedRelief(world.scene);
   world.memoryMeshes.forEach(group=>group.traverse(object=>{object.castShadow=false;}));
   world.oil=applyOilMaterials(world.scene);
@@ -101,9 +104,9 @@ function setWorld(id){
   // A low, warm key skims the raised paint; restrained sky fill leaves cool
   // coloured cavities between the swipes instead of bleaching every surface.
   const paintKey=world.scene.getObjectByName('paint-sun');
-  const keyPositions=[[-24,26,-14],[-28,24,-14],[-28,25,-22],[-38,20,-28]];
+  const keyPositions=[[-24,26,-14],[-28,24,-14],[-28,38,26],[-38,20,-28]];
   paintKey.position.set(...keyPositions[id]);paintKey.intensity=[3.6,3.5,3.7,3.5][id];
-  world.scene.children.filter(object=>object.isHemisphereLight).forEach(light=>{light.intensity=[.60,.52,.58,.52][id];});
+  world.scene.children.filter(object=>object.isHemisphereLight).forEach(light=>{light.intensity=[.60,.52,.72,.52][id];});
   configurePaintShadows(renderer,world.scene,runtime.quality);
   world.setDetailLevel?.(runtime.quality==='auto'&&touchDevice()?'low':runtime.quality);
   world.scene.traverse(object=>object.userData.paintLiquid?.setReflectionEnabled(runtime.quality!=='low'&&(!touchDevice()||runtime.quality==='high')));
@@ -131,6 +134,7 @@ async function travel(id){
     await new Promise(r=>setTimeout(r,200));
   }catch(e){console.error(e);fail('世界の描画に失敗しました。ページを再読み込みしてください。');}
   transition.classList.remove('visible');runtime.transitioning=false;updateProgress();
+  if(runtime.started)canvas.focus({preventScroll:true});
 }
 function nearestAction(){
   if(!runtime.started||runtime.transitioning||dialogOpen())return null;
@@ -189,7 +193,7 @@ function resize(){
   const cap=high?2:low?.85:touchDevice()?1.15:1.5;
   const ratio=Math.min(high&&!touchDevice()?Math.max(devicePixelRatio,1.25):devicePixelRatio,cap)*dynamicScale;
   renderer.setPixelRatio(ratio);renderer.setSize(innerWidth,innerHeight,false);
-  camera.aspect=innerWidth/innerHeight;camera.fov=touchDevice()?67:59;camera.updateProjectionMatrix();
+  camera.aspect=innerWidth/innerHeight;camera.fov=touchDevice()?67:runtime.worldId===2?65:59;camera.updateProjectionMatrix();
   composer.setPixelRatio(ratio);composer.setSize(innerWidth,innerHeight);
   paintPass.uniforms.resolution.value.set(innerWidth*ratio,innerHeight*ratio);
   bloom.enabled=!low;
@@ -214,7 +218,7 @@ function animate(now){
       runtime.yaw+=(Number(keys.has('KeyQ')||keys.has('ArrowLeft'))-Number(keys.has('KeyE')||keys.has('ArrowRight')))*dt*1.1;
       const desired=moveOnGround(runtime,runtime.yaw,f,s,dt,keys.has('ShiftLeft')||keys.has('ShiftRight')?7.3:4.2);
       const aroundRocks=slideAroundPaint(runtime,desired,world.obstacles);
-      const pos=runtime.worldId===0?constrainTerrainStep(runtime,aroundRocks,world.groundHeight,{
+      const pos=(runtime.worldId===0||runtime.worldId===2)?constrainTerrainStep(runtime,aroundRocks,world.groundHeight,{
         isPositionAllowed:(x,z,from)=>world.obstacles.every(obstacle=>{
           const radius=obstacle.radius+.26;
           const after=Math.hypot(x-obstacle.x,z-obstacle.z),before=Math.hypot(from.x-obstacle.x,from.z-obstacle.z);
@@ -260,7 +264,7 @@ async function boot(){
     portalTextures=await Promise.all(WORLD_INFO.map(async info=>{const texture=await loader.loadAsync(`${import.meta.env.BASE_URL}art/${info.sky.replace('-sky','-portal')}.webp`);texture.colorSpace=THREE.SRGBColorSpace;return texture;}));
     const pmrem=new THREE.PMREMGenerator(renderer);environmentMaps=skyTextures.map(texture=>pmrem.fromEquirectangular(texture));pmrem.dispose();
     $('#loading-status').textContent='厚い絵具に、光を入れています';
-    await Promise.all([loadOilPaintTexture(),loadPaintedFloraAtlas(),loadPaintedVistas()]);
+    await Promise.all([loadOilPaintTexture(),loadPaintedFloraAtlas(),loadPaintedVistas(),loadCanyonVista()]);
     setWorld(0);await renderer.compileAsync(world.scene,camera);runtime.ready=true;
     $('#start-button').disabled=false;$('#start-button span').textContent='旅をはじめる';$('#loading-status').textContent='';
     requestAnimationFrame(animate);

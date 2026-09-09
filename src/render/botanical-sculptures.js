@@ -175,7 +175,7 @@ export function addBotanicalSculptures(scene, { id = 0, baseHeight, pathX, isPon
     meshes.forEach(mesh => mesh.dispose()); geometries.forEach(geometry => geometry.dispose()); materials.forEach(material => material.dispose()); group.clear();
   };
   dispose.group = group; dispose.count = 0; dispose.triangles = 0; dispose.renderTriangles = 0; dispose.update = () => {};
-  if (id !== 0 && id !== 1 || density <= 0) return dispose;
+  if (id < 0 || id > 2 || density <= 0) return dispose;
   if (typeof baseHeight !== 'function' || typeof pathX !== 'function') throw new TypeError('Botanical sculptures require baseHeight and pathX.');
   for (let variant = 0; variant < 5; variant++) {
     const resolutions = [];
@@ -185,7 +185,7 @@ export function addBotanicalSculptures(scene, { id = 0, baseHeight, pathX, isPon
   const material = new THREE.MeshStandardMaterial({ name: 'Botanical sculpted pigment', vertexColors: true, color: '#ffffff', roughness: .49, metalness: 0 });
   material.userData.pigmentSurface = 'foliage'; materials.push(material);
   const random = seeded(seed + id * 1979), batches = new Map();
-  const memories = id === 0 ? [[-4, 4], [-8, -9], [10, -21]] : [[5, 3], [-9, -5], [8, -19]];
+  const memories = id === 2 ? [[-5,4],[12,-3],[-7,-18]] : id === 0 ? [[-4, 4], [-8, -9], [10, -21]] : [[5, 3], [-9, -5], [8, -19]];
   const patchCount = Math.round(42 * clamp(density, 0, 3));
   let driftX = 0, driftZ = 0, driftIris = true, driftIndex = 0;
   for (let patch = 0; patch < patchCount; patch++) {
@@ -194,7 +194,7 @@ export function addBotanicalSculptures(scene, { id = 0, baseHeight, pathX, isPon
       const side = driftIndex % 2 ? 1 : -1;
       driftZ = driftIndex < 6 ? [14, 10, 4, 19, -3, -10][driftIndex] + (random() - .5) * 1.2 : 22 - random() * 42;
       driftX = pathX(driftZ) + side * (2.0 + random() ** 1.5 * 4.7);
-      driftIris = driftIndex % 5 < 3;
+      driftIris = driftIndex % 5 < (id===2?1:3);
     }
     // Adjacent patches share a colour and an elongated centre. The resulting
     // drifts contain many overlapping stems without covering every bare area.

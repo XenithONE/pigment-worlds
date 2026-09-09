@@ -1,6 +1,6 @@
 {
   "date": "2026-09-10",
-  "scope": "Painted landscapes: connected riverbank, botanical sculptures and distant vistas; final art captures, actual-keyboard 12-color traversal and persistence, desktop/touch controls and quality changes",
+  "scope": "Golden canyon revision: actual-keyboard 12-colour traversal and restoration, all-world desktop art captures, touch-viewport art and controls, canyon 360-degree drag inspection. The 360-degree inspection precedes the last river widening and terrain micro-relief; final entry captures include those changes. Desktop garden photo precedes replacing its portal thumbnail; mobile garden verifies the replacement.",
   "desktop": {
     "health": {
       "title": "PIGMENT — 絵の向こうへ",
@@ -25,16 +25,16 @@
         },
         "positionAfter": {
           "x": 0,
-          "z": 9.95958000000003,
+          "z": 9.909600000000012,
           "yaw": 0,
           "pitch": -0.015
         },
         "quality": "high",
         "pixelRatio": 1.25,
-        "triangles": 13371517,
+        "triangles": 13361341,
         "drawCalls": 470,
-        "frameMedian": 33.19999999999709,
-        "frameP95": 33.400000000001455
+        "frameMedian": 18.19999999999709,
+        "frameP95": 18.299999999995634
       },
       {
         "world": 1,
@@ -46,7 +46,7 @@
         },
         "positionAfter": {
           "x": 0,
-          "z": 9.820139999999979,
+          "z": 9.858780000000008,
           "yaw": 0,
           "pitch": -0.015
         },
@@ -54,29 +54,29 @@
         "pixelRatio": 1.25,
         "triangles": 10459301,
         "drawCalls": 592,
-        "frameMedian": 33.30000000000291,
-        "frameP95": 33.40000000000873
+        "frameMedian": 18.19999999999709,
+        "frameP95": 18.30000000000291
       },
       {
         "world": 2,
         "positionBefore": {
-          "x": 0,
+          "x": -3.5,
           "z": 15,
-          "yaw": 0,
-          "pitch": -0.015
+          "yaw": 0.08,
+          "pitch": 0.035
         },
         "positionAfter": {
-          "x": 0,
-          "z": 9.889860000000002,
-          "yaw": 0,
-          "pitch": -0.015
+          "x": -3.8995814613152597,
+          "z": 10.015891788316258,
+          "yaw": 0.08,
+          "pitch": 0.035
         },
         "quality": "high",
         "pixelRatio": 1.25,
-        "triangles": 8324078,
-        "drawCalls": 275,
-        "frameMedian": 33.30000000000291,
-        "frameP95": 33.40000000000873
+        "triangles": 5311379,
+        "drawCalls": 242,
+        "frameMedian": 18.19999999999709,
+        "frameP95": 18.30000000000291
       },
       {
         "world": 3,
@@ -88,7 +88,7 @@
         },
         "positionAfter": {
           "x": 0,
-          "z": 9.889859999999942,
+          "z": 9.919259999999955,
           "yaw": 0,
           "pitch": -0.015
         },
@@ -96,15 +96,15 @@
         "pixelRatio": 1.25,
         "triangles": 11346247,
         "drawCalls": 441,
-        "frameMedian": 33.30000000000291,
-        "frameP95": 33.5
+        "frameMedian": 18.19999999999709,
+        "frameP95": 18.30000000000291
       }
     ]
   },
   "mobile": {
     "health": {
       "title": "PIGMENT — 絵の向こうへ",
-      "meaningful": "睡蓮の庭",
+      "meaningful": "黄金の渓谷",
       "overflow": false,
       "errorPanel": false,
       "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Ti (0x00001B06) Direct3D11 vs_5_0 ps_5_0, D3D11)"
@@ -129,8 +129,8 @@
         "pixelRatio": 1,
         "triangles": 2787279,
         "drawCalls": 192,
-        "frameMedian": 16.69999999999709,
-        "frameP95": 16.80000000000291
+        "frameMedian": 18.19999999999709,
+        "frameP95": 18.30000000000291
       },
       {
         "world": 1,
@@ -150,8 +150,29 @@
         "pixelRatio": 1,
         "triangles": 2807974,
         "drawCalls": 209,
-        "frameMedian": 16.69999999999709,
-        "frameP95": 16.80000000000291
+        "frameMedian": 18.19999999999709,
+        "frameP95": 18.30000000000291
+      },
+      {
+        "world": 2,
+        "positionBefore": {
+          "x": -3.5,
+          "z": 15,
+          "yaw": -0.12000000000000001,
+          "pitch": 0.035
+        },
+        "positionAfter": {
+          "x": -3.5,
+          "z": 15,
+          "yaw": -0.12000000000000001,
+          "pitch": 0.035
+        },
+        "quality": "auto",
+        "pixelRatio": 1,
+        "triangles": 3025803,
+        "drawCalls": 174,
+        "frameMedian": 18.10000000000582,
+        "frameP95": 18.30000000000291
       }
     ]
   },
@@ -161,8 +182,8 @@
       {
         "memory": "0-a",
         "position": {
-          "x": -2.8395499144142438,
-          "z": 6.018376560953907,
+          "x": -2.961327844270195,
+          "z": 5.859425039499715,
           "yaw": 0,
           "pitch": -0.015
         },
@@ -171,8 +192,8 @@
       {
         "memory": "0-b",
         "position": {
-          "x": -7.731449694543278,
-          "z": -7.718928527139493,
+          "x": -7.852533253310602,
+          "z": -7.8357164497216605,
           "yaw": 0,
           "pitch": -0.015
         },
@@ -181,8 +202,8 @@
       {
         "memory": "0-c",
         "position": {
-          "x": 7.916176000583446,
-          "z": -20.022268321733996,
+          "x": 8.058851171723628,
+          "z": -19.978105539683803,
           "yaw": 0,
           "pitch": -0.015
         },
@@ -191,8 +212,8 @@
       {
         "memory": "1-a",
         "position": {
-          "x": 3.9570968267404876,
-          "z": 5.020247272727098,
+          "x": 4.132600729830913,
+          "z": 4.974548696273518,
           "yaw": 0,
           "pitch": -0.015
         },
@@ -201,8 +222,8 @@
       {
         "memory": "1-b",
         "position": {
-          "x": -7.055773092188452,
-          "z": -3.927870845137125,
+          "x": -6.919741624438365,
+          "z": -3.886333657995675,
           "yaw": 0,
           "pitch": -0.015
         },
@@ -211,8 +232,8 @@
       {
         "memory": "1-c",
         "position": {
-          "x": 6.737058464721805,
-          "z": -18.752348302579733,
+          "x": 6.698922212075226,
+          "z": -18.714275993465268,
           "yaw": 0,
           "pitch": -0.015
         },
@@ -221,38 +242,38 @@
       {
         "memory": "2-a",
         "position": {
-          "x": -4.819646891635302,
-          "z": 5.255919583732846,
-          "yaw": 0,
-          "pitch": -0.015
+          "x": -4.983007801811489,
+          "z": 6.210199486884502,
+          "yaw": 0.08,
+          "pitch": 0.035
         },
         "collected": 7
       },
       {
         "memory": "2-b",
         "position": {
-          "x": 10.665800436958104,
-          "z": -1.7126177448605784,
-          "yaw": 0,
-          "pitch": -0.015
+          "x": 10.548998299500717,
+          "z": -3.087495413066896,
+          "yaw": 0.08,
+          "pitch": 0.035
         },
         "collected": 8
       },
       {
         "memory": "2-c",
         "position": {
-          "x": -5.6808395720712905,
-          "z": -17.68516625284602,
-          "yaw": 0,
-          "pitch": -0.015
+          "x": -4.861031783234049,
+          "z": -16.76544408089827,
+          "yaw": 0.08,
+          "pitch": 0.035
         },
         "collected": 9
       },
       {
         "memory": "3-a",
         "position": {
-          "x": -3.0109243139025668,
-          "z": 5.1152397855649925,
+          "x": -2.879812574535136,
+          "z": 5.111457425465029,
           "yaw": 0,
           "pitch": -0.015
         },
@@ -261,8 +282,8 @@
       {
         "memory": "3-b",
         "position": {
-          "x": -6.796646741154705,
-          "z": -6.943572641687271,
+          "x": -6.907627150462224,
+          "z": -6.990309364031559,
           "yaw": 0,
           "pitch": -0.015
         },
@@ -271,8 +292,8 @@
       {
         "memory": "3-c",
         "position": {
-          "x": 5.850474228317002,
-          "z": -19.590693611158905,
+          "x": 5.752914705716268,
+          "z": -19.650851220210104,
           "yaw": 0,
           "pitch": -0.015
         },
@@ -307,37 +328,37 @@
         },
         "moved": {
           "x": 0,
-          "z": 12.340560000000005,
-          "yaw": 0.4033700000000007,
+          "z": 12.427500000000002,
+          "yaw": 0.41733999999999777,
           "pitch": -0.015
         },
         "looked": {
           "x": 0,
-          "z": 12.340560000000005,
-          "yaw": 0.7443700000000006,
+          "z": 12.427500000000002,
+          "yaw": 0.7583399999999978,
           "pitch": -0.24900000000000005
         },
         "reset": {
-          "x": 0,
+          "x": -3.5,
           "z": 15,
-          "yaw": 0,
-          "pitch": -0.015
+          "yaw": 0.08,
+          "pitch": 0.035
         },
         "modes": [
           {
             "mode": "low",
-            "drawCalls": 299,
-            "triangles": 3043569
+            "drawCalls": 240,
+            "triangles": 3407824
           },
           {
             "mode": "high",
-            "drawCalls": 611,
-            "triangles": 10544893
+            "drawCalls": 258,
+            "triangles": 5353703
           },
           {
             "mode": "auto",
-            "drawCalls": 611,
-            "triangles": 8945525
+            "drawCalls": 258,
+            "triangles": 4769063
           }
         ],
         "health": {
@@ -354,44 +375,109 @@
           "pitch": -0.015
         },
         "moved": {
-          "x": 0.8408498793654158,
-          "z": 10.851957317971832,
+          "x": 0.8504571360921424,
+          "z": 10.804563232609372,
           "yaw": -0.2,
           "pitch": -0.015
         },
         "looked": {
-          "x": 0.8408498793654158,
-          "z": 10.851957317971832,
+          "x": 0.8504571360921424,
+          "z": 10.804563232609372,
           "yaw": 0.017000000000000043,
           "pitch": -0.19700000000000004
         },
         "reset": {
-          "x": 0,
+          "x": -3.5,
           "z": 15,
-          "yaw": -0.2,
-          "pitch": -0.015
+          "yaw": -0.12000000000000001,
+          "pitch": 0.035
         },
         "modes": [
           {
             "mode": "low",
-            "drawCalls": 192,
-            "triangles": 2807957
+            "drawCalls": 157,
+            "triangles": 3025786
           },
           {
             "mode": "high",
-            "drawCalls": 399,
-            "triangles": 9070109
+            "drawCalls": 174,
+            "triangles": 4592807
           },
           {
             "mode": "auto",
-            "drawCalls": 209,
-            "triangles": 2807974
+            "drawCalls": 174,
+            "triangles": 3014393
           }
         ],
         "health": {
           "overflow": false,
           "error": false
         }
+      }
+    ]
+  },
+  "exploration": {
+    "errors": [],
+    "views": [
+      {
+        "name": "entrance",
+        "position": {
+          "x": -3.5,
+          "z": 15,
+          "yaw": 0.08,
+          "pitch": 0.035
+        },
+        "frameMedian": 16.69999999999709
+      },
+      {
+        "name": "river-overlook",
+        "position": {
+          "x": -7.486478562373245,
+          "z": 15.335579323342632,
+          "yaw": 0.7499999877929688,
+          "pitch": -0.3999999633789063
+        },
+        "frameMedian": 16.69999999999709
+      },
+      {
+        "name": "tree-and-castle",
+        "position": {
+          "x": -7.486478562373245,
+          "z": 15.335579323342632,
+          "yaw": 0.37999992675781274,
+          "pitch": 0.3200000061035155
+        },
+        "frameMedian": 16.69999999999709
+      },
+      {
+        "name": "west",
+        "position": {
+          "x": -7.486478562373245,
+          "z": 15.335579323342632,
+          "yaw": 1.5707963195800787,
+          "pitch": 5.4931640479372046e-8
+        },
+        "frameMedian": 16.69999999999709
+      },
+      {
+        "name": "south",
+        "position": {
+          "x": -7.486478562373245,
+          "z": 15.335579323342632,
+          "yaw": 3.141592657470705,
+          "pitch": 5.4931640479372046e-8
+        },
+        "frameMedian": 16.69999999999709
+      },
+      {
+        "name": "east",
+        "position": {
+          "x": -7.486478562373245,
+          "z": 15.335579323342632,
+          "yaw": 4.712388995361332,
+          "pitch": 5.4931640479372046e-8
+        },
+        "frameMedian": 16.69999999999709
       }
     ]
   }
