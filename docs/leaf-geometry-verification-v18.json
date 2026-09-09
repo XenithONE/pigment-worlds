@@ -1,0 +1,75 @@
+{
+  "pass": true,
+  "scope": "CPU only: actual helper closed indexed volumes/finite/unit normals/UV, unchanged triangle counts, unchanged world placement/RNG/API/LOD source and byte-identical other compact geometries. No rendered quality or self-intersection certification.",
+  "sourceHashes": {
+    "worlds": "47050b7ba98d0822866da83c1b151766ad94a64c262325dab4452d66b87740db",
+    "helper": "8b51fc8df89eac926fe3daf8d392bc372eb8f1ff4aefc964a7554b0eaaa74b73"
+  },
+  "records": [
+    {
+      "detail": 0,
+      "triangles": 360,
+      "vertices": 182,
+      "invalidEdges": 0,
+      "invalidNormals": 0,
+      "minTriangleArea": 0.0000013297745132745782,
+      "signedVolume": 0.006505288574562533,
+      "bounds": {
+        "min": [
+          -0.13640038669109344,
+          -0.5,
+          -0.001500000013038516
+        ],
+        "max": [
+          0.34332478046417236,
+          0.25,
+          0.3417600095272064
+        ]
+      }
+    },
+    {
+      "detail": 1,
+      "triangles": 80,
+      "vertices": 42,
+      "invalidEdges": 0,
+      "invalidNormals": 0,
+      "minTriangleArea": 0.000003247504421124732,
+      "signedVolume": 0.005176653549468857,
+      "bounds": {
+        "min": [
+          -0.13113823533058167,
+          -0.5,
+          -0.001500000013038516
+        ],
+        "max": [
+          0.32471728324890137,
+          0.25,
+          0.3417600095272064
+        ]
+      }
+    },
+    {
+      "detail": 2,
+      "triangles": 36,
+      "vertices": 20,
+      "invalidEdges": 0,
+      "invalidNormals": 0,
+      "minTriangleArea": 0.000003902965720972163,
+      "signedVolume": 0.0041418903685349175,
+      "bounds": {
+        "min": [
+          -0.11340326815843582,
+          -0.5,
+          -0.0014511867193505168
+        ],
+        "max": [
+          0.3304555416107178,
+          0.25,
+          0.34170272946357727
+        ]
+      }
+    }
+  ],
+  "preservedOtherShapes": 4,
+  "failures": []
+}

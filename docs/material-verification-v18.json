@@ -1,0 +1,79 @@
+{
+  "version": "v18 final D",
+  "passed": true,
+  "date": "2026-09-09T21:36:26.785Z",
+  "baselineCommit": "b2a2ff2ecab96e405ce83ef6c9149ead94cd7ca9",
+  "scope": "CPU import, real onBeforeCompile hooks against installed Three physical shaders, mask lexical scope, bound uniforms, non-canyon shader unchanged outside the isolated leaf-load feature block, and all coordinate/relief code unchanged versus committed v17; separate dragged-leaf versus grass/plain cache variants, coating reuse/restoration/disposal, numeric finite cases. No GLSL compiler, GPU link, actual frame or worlds.js geometry audit.",
+  "source": {
+    "path": "src/render/oil-material.js",
+    "sha256Raw": "0db86e5e0c203f4c556e6764df0df68c391f9d634de5df2d0617d68b73c11cc8",
+    "sha256LF": "5fb08503d345124545fe7fbb09c72b1ede81cc14c6b8764d6168147c2f52c64a",
+    "baselineSHA256LF": "1f7128371dfa963eaedbee15384d4fb1721aa310fb06ad95eb0ec0ef68a93844"
+  },
+  "shaderCases": 136,
+  "nonCanyonShaderCasesUnchangedOutsideIsolatedLeafLoadBlock": 128,
+  "leafLoadCases": 16,
+  "leafNumericComponentCases": 120000,
+  "leafOutputRange": [
+    0,
+    7.285445413257927
+  ],
+  "unchangedVertexShaderCases": 136,
+  "canyonMaskScopeCases": 8,
+  "generatedDisposalsIncludingBaseline": 256,
+  "restoredMaterialsIncludingBaseline": 272,
+  "numericComponentCases": 720000,
+  "ranges": {
+    "mask": [
+      0,
+      1
+    ],
+    "gain": [
+      0.64,
+      1.24
+    ],
+    "directRich": [
+      0.09504,
+      0.72
+    ],
+    "coat": [
+      0.16,
+      0.72
+    ],
+    "coatRoughness": [
+      0.18,
+      0.34
+    ],
+    "output": [
+      0.0013418529806658625,
+      2.1835945344874634
+    ]
+  },
+  "preservedSources": {
+    "src/render/surface-relief.js": {
+      "unchangedFromBaseline": true,
+      "sha256LF": "3ebb29ff3a2254b4843d5bcf886aa5c77fbe2dbe5187ae7794b835edf960d8a7"
+    },
+    "src/render/paint-coordinates.js": {
+      "unchangedFromBaseline": true,
+      "sha256LF": "23c8fc2de4455b26635252978bc2d99d4627201ad01341fecc5f8afb6e26ee81"
+    },
+    "src/render/paint-texture.js": {
+      "unchangedFromBaseline": true,
+      "sha256LF": "cf1869bc225367ec6cafb4bbb80536a2ce940270d55a29618d296db4b9ed95be"
+    }
+  },
+  "checks": {
+    "sourceStableDuringAudit": true
+  },
+  "behaviorNotes": [
+    "Non-rich canyon still receives the 30% authored body transfer and the new clearcoat mask, although direct atlas colour remains zero.",
+    "At atlas ready=0 the 30% body transfer and clearcoat mask still apply; these additions are not gated by atlas readiness.",
+    "Canyon currently has no loadRange. Adding one later would require moving the mask declaration outside that branch before its coat use.",
+    "The new body load has no crown-style 0.94 peak clamp; positive HDR authored inputs can yield values above one without nonfinite output.",
+    "Only flagged geometry named dragged-pigment-leaf-* enables the new colour multiplier. Narrow grass geometry/botanical/plain active code excludes it. Coastal batches named grass that use dragged-leaf geometry are included. All other non-canyon shader code is unchanged; cache keys include both blade and leafLoad flags.",
+    "The leaf multiplier also applies at ready=0, using the existing fallback atlas; it adds no samples or uniforms and retains the same relief/UV/normal/coat code.",
+    "The mask changes albedo coverage and clearcoat, not main roughnessFactor, texture coordinates, normal relief or physical displacement."
+  ],
+  "failures": []
+}

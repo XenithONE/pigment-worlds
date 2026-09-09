@@ -159,8 +159,9 @@ export function applyOilMaterials(scene, { richPigment = false, stochasticPigmen
       const moving = surface === 'foliage' && /grass|flower|foliage|tree-pigment|canopy|willow/i.test(object.name);
       const anchored = Boolean(object.geometry?.attributes.oilRestPosition && object.geometry?.attributes.oilRestNormal);
       const blade = surface === 'foliage' && Boolean(object.userData.pigmentBladeUV);
+      const leafLoad = blade && object.geometry?.name.startsWith('dragged-pigment-leaf-');
       if (!coatings.has(original)) coatings.set(original, new Map());
-      const variants = coatings.get(original), key = `${surface}:${moving}:${anchored}:${blade}`;
+      const variants = coatings.get(original), key = `${surface}:${moving}:${anchored}:${blade}:${leafLoad}`;
       if (variants.has(key)) return variants.get(key);
       const material = new MeshPhysicalMaterial();
       MeshStandardMaterial.prototype.copy.call(material, original);
@@ -168,6 +169,7 @@ export function applyOilMaterials(scene, { richPigment = false, stochasticPigmen
       if(stochasticPigment) material.defines.OIL_PATCH_MAPPING = '';
       if(anchored) material.defines.USE_OIL_REST = '';
       if(blade) material.defines.USE_OIL_BLADE_UV = '';
+      if(leafLoad) material.defines.USE_OIL_LEAF_LOAD = '';
       material.name = `${original.name || surface} / viscous oil`;
       material.userData = { ...original.userData, pigmentSurface: surface };
       // The old CanvasTexture repeated like linen. Preserve its palette as
@@ -265,6 +267,15 @@ export function applyOilMaterials(scene, { richPigment = false, stochasticPigmen
             // the raised lip below, rather than washing the whole petal white.
             float draggedValue = smoothstep(.30, .60, oil.y);
             diffuseColor.rgb = authoredLoad * mix(.57, 1.38, draggedValue);
+            #ifdef USE_OIL_LEAF_LOAD
+              // Pigment picked up by the same dragged stroke: cool underpaint
+              // and warm olive/ochre separate within each broad painted leaf.
+              // Using the atlas colour here keeps those transitions attached
+              // to its actual brush relief instead of a repeated leaf vein.
+              float leafTemperature = smoothstep(-.045, .09, paintedColor.r - paintedColor.b);
+              vec3 leafPigment = mix(vec3(.48, .76, 1.08), vec3(1.32, 1.14, .62), leafTemperature);
+              diffuseColor.rgb *= leafPigment;
+            #endif
           #endif
           diffuseColor.rgb *= 1. - oil.z * .065;
           // Keep the artist's actual pigment values in broad paint deposits.
@@ -277,7 +288,25 @@ export function applyOilMaterials(scene, { richPigment = false, stochasticPigmen
           vec3 depositedLoad = authoredLoad * min(loadGain, .94 / max(.001, loadPeak));
           diffuseColor.rgb = mix(diffuseColor.rgb, mix(depositedLoad, paintedColor, ${profile.atlasResidue.toFixed(2)}), uOilPaintReady);`
           : `float directPigment = uOilDirectPigment;
-          ${surface === 'canyon' ? 'directPigment *= mix(.24, 1., smoothstep(.025, .18, pigmentLight));' : ''}
+          ${surface === 'canyon' ? `
+          // Broad pigment bodies stay visible between dragged interfaces.
+          // This object-space layer field changes colour coverage, never the
+          // atlas coordinates shared by the physical and shaded relief.
+          vec3 layerPosition = vOilPosition;
+          float layerFlow = layerPosition.x * .23 + layerPosition.y * .31
+            + .82 * sin(layerPosition.z * .19 + .34 * sin(layerPosition.x * .16))
+            + .27 * sin(layerPosition.z * .43 + layerPosition.y * .13);
+          float layerPhase = sin(layerFlow);
+          float layerInterface = 1. - smoothstep(.10, .38, abs(layerPhase));
+          float scrapedPaint = 1. - smoothstep(.29, .53, oil.y);
+          float canyonMixedEdge = max(layerInterface, scrapedPaint * .70);
+          float loadValue = mix(.64, 1.24, smoothstep(.25, .63, oil.y));
+          vec3 bodyPigment = authoredLoad * loadValue;
+          // A little source pigment remains inside the body; the complete
+          // blue/ochre/ivory strands return at scraped and overlapping edges.
+          diffuseColor.rgb = mix(diffuseColor.rgb, bodyPigment, .30);
+          directPigment *= mix(.55, 1., canyonMixedEdge)
+            * mix(.24, 1., smoothstep(.025, .18, pigmentLight));` : ''}
           diffuseColor.rgb = mix(diffuseColor.rgb, paintedColor, directPigment * uOilPaintReady);`}`);
         shader.fragmentShader = shader.fragmentShader.replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
           vec3 oilS = dFdx(-vViewPosition), oilT = dFdy(-vViewPosition);
@@ -295,9 +324,9 @@ export function applyOilMaterials(scene, { richPigment = false, stochasticPigmen
         shader.fragmentShader = shader.fragmentShader.replace('#include <lights_physical_fragment>', `#include <lights_physical_fragment>
           #ifdef USE_CLEARCOAT
             material.clearcoatRoughness = clamp(material.clearcoatRoughness + (1. - oil.y) * .10 - oil.z * .08, .14, .4);
-            ${surface === 'canyon' ? `float paintRim = smoothstep(.45, .69, oil.x);
-            material.clearcoat = mix(.26, .55, paintRim);
-            material.clearcoatRoughness = mix(.28, .22, paintRim);` : ''}
+            ${surface === 'canyon' ? `float paintRim = smoothstep(.45, .69, oil.x) * canyonMixedEdge;
+            material.clearcoat = mix(.16, .72, paintRim);
+            material.clearcoatRoughness = mix(.34, .18, paintRim);` : ''}
             #ifdef USE_OIL_BLADE_UV
               float loadedLip = exp(-pow((cos(vOilBladeUv.x * 6.283185307) + sin(vOilBladeUv.y * 4.3) * .065 + sin(vOilBladeUv.y * 9.1) * .012 - .63) / .14, 2.));
               material.clearcoat = mix(.25, .72, loadedLip);
@@ -305,7 +334,7 @@ export function applyOilMaterials(scene, { richPigment = false, stochasticPigmen
             #endif
           #endif`);
       };
-      material.customProgramCacheKey = () => `pigment-viscous-atlas-v17-${surface}-${moving}-${richPigment}-${anchored}-${stochasticPigment}-${blade}`;
+      material.customProgramCacheKey = () => `pigment-viscous-atlas-v18-${surface}-${moving}-${richPigment}-${anchored}-${stochasticPigment}-${blade}-${leafLoad}`;
       material.needsUpdate = true;
       variants.set(key, material);
       return material;

@@ -1,5 +1,15 @@
 # Pigment and canyon material revisions
 
+## v18 — separate pigment bodies and folded leaves
+
+The canyon keeps the classic atlas, height coordinates and geometric displacement. An object-space layer field separates broad authored pigment bodies from scraped and overlapping mixed-colour interfaces. Source-colour coverage is reduced inside the bodies; its complete multicolour strands remain at the interfaces. The same mask confines the strongest clearcoat to raised interfaces. Topography now carries deep teal, olive, rust and ochre pigments. River colour and geometry are unchanged.
+
+Candidate A suppressed too much source colour and made the right cliff resemble beige icing. Candidate B restored brush information by reducing the authored-body blend from .68 to .30 and raising the interior direct-colour multiplier from .27 to .55. Candidate C added the richer topography palette and was selected after an independent comparison of actual entrance photographs. This is a local art-direction mask, not simulated wet-paint mixing or a measured deposition map.
+
+`dragged-leaf.js` replaces inflated generic leaves with asymmetrical flattened loads, thin undersides, blunt dragged ends and a folded lip. High/mid/low sample the same design at 360/80/36 triangles. A dedicated material variant adds cool/warm pigment variation from the existing matching atlas sample; it does not change the narrow grass or botanical iris shader. It applies to any batch using this leaf geometry, including coastal grass and leaf-shaped waterlily petals.
+
+The selected leaf-colour candidate reduces the monotonous olive appearance. Repeated shapes and two-colour patterns can still resemble glazed ceramic. [v18 verification](../docs/paint-verification-v18.md) records the actual scope and remaining reference differences. The quality goal remains open.
+
 ## v17 — dragged paint on plants
 
 The selected plant revision flattens the broad botanical blade faces and places more thickness at the folded perimeter. Stems are closed flattened ribbons, and vertex pigment bands follow their modeled ridges. A complete interior atlas region is sampled directly in blade UVs, so broad relief, pigment value and cavities belong to the same dragged field. Clearcoat is concentrated at a narrow lip. The first regular analytic-striped trial and a subtler spatially blended trial were rejected after nearby garden inspection.

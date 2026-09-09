@@ -10,6 +10,7 @@ import { addBotanicalSculptures } from './botanical-sculptures.js';
 import { addSculptedCanyon, canyonHeight, canyonRiverContains } from './sculpted-canyon.js';
 import { addPaintedTree } from './painted-tree.js';
 import { addCanyonPlanting } from './canyon-planting.js';
+import { makeDraggedLeafGeometry } from './dragged-leaf.js';
 
 // The scenery is original, traversable geometry. Generated paintings supply the
 // sky panoramas; small, instanced impasto marks make up the living foreground.
@@ -76,23 +77,7 @@ function makeGrassBladeGeometry(rows = 12, sides = 8) {
   const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3)); geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2)); geometry.setIndex(indices); geometry.computeVertexNormals(); return geometry;
 }
 function makeLeafGeometry() {
-  const points = [], uv = [], indices = [], rows = 14, sides = 12;
-  for (let row = 0; row <= rows; row++) {
-    const t = row / rows, r = Math.max(.006, Math.sin(Math.PI * t) ** .45);
-    for (let s = 0; s <= sides; s++) {
-      const a = s / sides * TAU, rib = 1 + .12 * Math.sin(a * 4 + .55 * Math.sin(t * 6)) * Math.sin(Math.PI * t);
-      const knifeEdge = .024 * Math.cos(a * 3 - .55 * Math.sin(t * 4)) * Math.sin(Math.PI * t);
-      points.push(Math.cos(a) * r * .21 * (1 + .09 * Math.cos(t * 8 + a)) * rib + .15 * Math.sin(Math.PI * t) + .14 * t * t, t - .5 - .25 * t ** 4, Math.sin(a) * r * .085 * rib + .34 * t * t + .045 * Math.sin(Math.PI * t) + knifeEdge); uv.push(s / sides, t);
-      if (row < rows && s < sides) { const i = row * (sides + 1) + s; indices.push(i, i + sides + 1, i + 1, i + 1, i + sides + 1, i + sides + 2); }
-    }
-  }
-  for(const top of [false,true]){
-    const ring=(top?rows:0)*(sides+1), centre=points.length/3;let x=0,y=0,z=0;
-    for(let s=0;s<sides;s++){const i=(ring+s)*3;x+=points[i];y+=points[i+1];z+=points[i+2];}
-    points.push(x/sides,y/sides,z/sides);uv.push(.5,top?1:0);
-    for(let s=0;s<sides;s++)indices.push(...(top?[centre,ring+s+1,ring+s]:[centre,ring+s,ring+s+1]));
-  }
-  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(points, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.setIndex(indices); g.computeVertexNormals(); return g;
+  return makeDraggedLeafGeometry(0);
 }
 function makePetalGeometry() {
   const points = [], normals = [], indices = [], ts = [0, .12, .34, .63, .86, 1], sides = 8;
@@ -119,6 +104,7 @@ function makePetalGeometry() {
 // Coarser paint loads keep several curved rings. A single diamond ring made
 // enlarged coastal leaves look like folded paper on smaller screens.
 function makeCompactPaintGeometry(kind, veryLow = false) {
+  if (kind === 'leaf') return makeDraggedLeafGeometry(veryLow ? 2 : 1);
   const petal = kind === 'petal', width = petal ? .43 : kind === 'leaf' ? .21 : .47;
   const depth = petal ? .105 : kind === 'leaf' ? .085 : .14, curve = .045;
   const sides = veryLow ? 6 : 8, levels = veryLow ? [.18, .5, .82] : [.10, .26, .48, .71, .90];
@@ -250,13 +236,15 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
   const c1 = new THREE.Color(p.ground[1]), c2 = new THREE.Color(p.ground[3]);
   for (let i = 0; i < pos.count; i++) { const x = pos.getX(i), z = pos.getZ(i); let y = baseHeight(x, z); if (id === 1 && isPond(x, z)) y = -.58; if (isSea(x, z)) y = -3.2; pos.setY(i, y); color.copy(c1).lerp(c2, .5 + .25 * Math.sin(x * .3) * Math.sin(z * .27)); colors.push(color.r, color.g, color.b); }
   if(id===2){
-    const rockColors=['#174b60','#296979','#9b773f','#c69749','#d4b36f','#63818a'].map(c=>new THREE.Color(c));
+    // Deep pigment bodies show through the scraped mixed-colour interfaces.
+    // The river owns its separate blue/gold palette in sculpted-canyon.js.
+    const rockColors=['#153c48','#374b32','#74372a','#a87334','#c29a56','#344e59'].map(c=>new THREE.Color(c));
     for(let i=0;i<pos.count;i++){
       const x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i),phase=y*.41+Math.sin(z*.14)*.7+Math.sin(x*.29)*.45;
       const band=Math.floor(phase),fraction=phase-band;
       color.copy(rockColors[((band%6)+6)%6]).lerp(rockColors[(((band+1)%6)+6)%6],smoothstep(.74,1,fraction));
       const exposed=smoothstep(15,22,x)+smoothstep(-15,-26,x);
-      if(exposed<.2)color.set('#93866b').lerp(new THREE.Color('#305969'),.18+.15*Math.sin(x*.74+z*.53));
+      if(exposed<.2)color.set('#74603e').lerp(new THREE.Color('#244c52'),.18+.15*Math.sin(x*.74+z*.53));
       colors[i*3]=color.r;colors[i*3+1]=color.g;colors[i*3+2]=color.b;
     }
   }
