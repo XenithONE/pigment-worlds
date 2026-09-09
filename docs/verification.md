@@ -1,5 +1,7 @@
 # Canyon and paint verification — v16, 2026-09-10
 
+This is the retained v16 record. The subsequent plant and generic-leaf revision has its own [v17 verification](plant-verification-v17.md), including the scope of its additional browser checks.
+
 v16 keeps the classic pigment/relief atlas and the v15 tree geometry. The tree and separate paint deposits now retain their authored colours with stronger stroke-value variation. Thickened closed botanical blades carry lengthwise brush ridges; shorter irregular bank loads and three cascades replace the canyon's earlier hanging sheets. The four worlds and twelve discoveries remain.
 
 The canyon uses smaller matched colour/height coordinates and a denser near-bank mesh to reduce the large triangular foreground facets. A new impasto sky is selected for the canyon, with a blended overhead projection that removes the pinhole visible in its first trial. See the [material revision](../design/material-revision.md) and [sky provenance and inspection](../design/sky-v16-prompts.md).

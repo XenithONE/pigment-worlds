@@ -1,0 +1,513 @@
+{
+  "passed": true,
+  "scope": "CPU finite attributes, oriented closed component topology, all botanical/herb LOD factories, actual garden blade flags/UVs, generated material hook/cache variants. No GPU linking or render quality measurement.",
+  "sourceHashes": {
+    "src/render/botanical-sculptures.js": "82c7f5e11e4486b77bcb8a65c7f71375c23c48639185d5edffe177be86f21820",
+    "src/render/pigment-herbs.js": "3b07afa13ce03f3d71bbf62fa707a6e2630bcd280f84c5e12de6431fb533d8c9",
+    "src/render/painted-flora.js": "3cda21fd354556b6fb2045c4d4a95baecec181d0aaebab8c71d60f5767d12c2b",
+    "src/render/oil-material.js": "fd4021d67d3b6264beeefbf9a074b8c227988f86343f4643eb949aa02615f7f7"
+  },
+  "geometryCases": 81,
+  "parts": 3060,
+  "checkedTriangles": 489630,
+  "checkedAttributeValues": 3162951,
+  "normalRange": [
+    0.9999999542533835,
+    1.0000000471004575
+  ],
+  "quantizedDegenerateTriangles": 0,
+  "garden": {
+    "meshes": 122,
+    "lodGeometriesObserved": 24,
+    "oilMaterialVariants": 2
+  },
+  "failures": [],
+  "records": [
+    {
+      "name": "botanical-0-0-0",
+      "triangles": 13352,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-0-0-1",
+      "triangles": 5036,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-0-0-2",
+      "triangles": 1924,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-0-1-0",
+      "triangles": 13352,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-0-1-1",
+      "triangles": 5036,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-0-1-2",
+      "triangles": 1924,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-0-2-0",
+      "triangles": 13352,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-0-2-1",
+      "triangles": 5036,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-0-2-2",
+      "triangles": 1924,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-0-3-0",
+      "triangles": 8650,
+      "parts": 45,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-0-3-1",
+      "triangles": 3350,
+      "parts": 45,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-0-3-2",
+      "triangles": 1720,
+      "parts": 45,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-0-4-0",
+      "triangles": 9958,
+      "parts": 52,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-0-4-1",
+      "triangles": 3856,
+      "parts": 52,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-0-4-2",
+      "triangles": 1984,
+      "parts": 52,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-1-0-0",
+      "triangles": 13352,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-1-0-1",
+      "triangles": 5036,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-1-0-2",
+      "triangles": 1924,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-1-1-0",
+      "triangles": 13352,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-1-1-1",
+      "triangles": 5036,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-1-1-2",
+      "triangles": 1924,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-1-2-0",
+      "triangles": 13352,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-1-2-1",
+      "triangles": 5036,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-1-2-2",
+      "triangles": 1924,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-1-3-0",
+      "triangles": 8650,
+      "parts": 45,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-1-3-1",
+      "triangles": 3350,
+      "parts": 45,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-1-3-2",
+      "triangles": 1720,
+      "parts": 45,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-1-4-0",
+      "triangles": 9958,
+      "parts": 52,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-1-4-1",
+      "triangles": 3856,
+      "parts": 52,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-1-4-2",
+      "triangles": 1984,
+      "parts": 52,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-2-0-0",
+      "triangles": 13352,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-2-0-1",
+      "triangles": 5036,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-2-0-2",
+      "triangles": 1924,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-2-1-0",
+      "triangles": 13352,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-2-1-1",
+      "triangles": 5036,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-2-1-2",
+      "triangles": 1924,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-2-2-0",
+      "triangles": 13352,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-2-2-1",
+      "triangles": 5036,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-2-2-2",
+      "triangles": 1924,
+      "parts": 34,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-2-3-0",
+      "triangles": 8650,
+      "parts": 45,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-2-3-1",
+      "triangles": 3350,
+      "parts": 45,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-2-3-2",
+      "triangles": 1720,
+      "parts": 45,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-2-4-0",
+      "triangles": 9958,
+      "parts": 52,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-2-4-1",
+      "triangles": 3856,
+      "parts": 52,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "botanical-2-4-2",
+      "triangles": 1984,
+      "parts": 52,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-0-0-0",
+      "triangles": 9900,
+      "parts": 33,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-0-0-1",
+      "triangles": 4752,
+      "parts": 33,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-0-0-2",
+      "triangles": 2376,
+      "parts": 33,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-0-1-0",
+      "triangles": 9900,
+      "parts": 33,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-0-1-1",
+      "triangles": 4752,
+      "parts": 33,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-0-1-2",
+      "triangles": 2376,
+      "parts": 33,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-0-2-0",
+      "triangles": 9900,
+      "parts": 33,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-0-2-1",
+      "triangles": 4752,
+      "parts": 33,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-0-2-2",
+      "triangles": 2376,
+      "parts": 33,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-1-0-0",
+      "triangles": 10800,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-1-0-1",
+      "triangles": 5184,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-1-0-2",
+      "triangles": 2592,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-1-1-0",
+      "triangles": 10800,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-1-1-1",
+      "triangles": 5184,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-1-1-2",
+      "triangles": 2592,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-1-2-0",
+      "triangles": 10800,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-1-2-1",
+      "triangles": 5184,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-1-2-2",
+      "triangles": 2592,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-2-0-0",
+      "triangles": 10800,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-2-0-1",
+      "triangles": 5184,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-2-0-2",
+      "triangles": 2592,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-2-1-0",
+      "triangles": 10800,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-2-1-1",
+      "triangles": 5184,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-2-1-2",
+      "triangles": 2592,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-2-2-0",
+      "triangles": 10800,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-2-2-1",
+      "triangles": 5184,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-2-2-2",
+      "triangles": 2592,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-3-0-0",
+      "triangles": 10800,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-3-0-1",
+      "triangles": 5184,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-3-0-2",
+      "triangles": 2592,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-3-1-0",
+      "triangles": 10800,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-3-1-1",
+      "triangles": 5184,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-3-1-2",
+      "triangles": 2592,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-3-2-0",
+      "triangles": 10800,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-3-2-1",
+      "triangles": 5184,
+      "parts": 36,
+      "unmatchedEdges": 0
+    },
+    {
+      "name": "closed-pigment-herb-3-2-2",
+      "triangles": 2592,
+      "parts": 36,
+      "unmatchedEdges": 0
+    }
+  ]
+}

@@ -1,5 +1,11 @@
 # Pigment and canyon material revisions
 
+## v17 — dragged paint on plants
+
+The selected plant revision flattens the broad botanical blade faces and places more thickness at the folded perimeter. Stems are closed flattened ribbons, and vertex pigment bands follow their modeled ridges. A complete interior atlas region is sampled directly in blade UVs, so broad relief, pigment value and cavities belong to the same dragged field. Clearcoat is concentrated at a narrow lip. The first regular analytic-striped trial and a subtler spatially blended trial were rejected after nearby garden inspection.
+
+Existing leaf and grass batches in all four worlds now use this blade material branch too. Coarse leaf geometries gain periodic folded UVs; their positions, normals and indices are unchanged. The [v17 plant verification](../docs/plant-verification-v17.md) separates its new checks and images from the historical v16 suite below. Some sculpted or clay-like appearance remains; this is not a claim of reference-level completion.
+
 v16 builds on the retained pigment/relief atlas with thicker botanical forms,
 paint-colour variation on deposited loads, shorter layered banks and poured
 river steps. The canyon sky now carries broad painted clouds and a projected

@@ -11,8 +11,9 @@ const seeded = seed => () => {
   return ((t ^ t >>> 14) >>> 0) / 4294967296;
 };
 
-// A volumetric blade wrapped around a bent centre line. Both faces share the
-// same broad knife folds; a rounded thickness and end caps close the volume.
+// A flattened load wrapped around a bent centre line. Broad knife faces meet
+// a rolled perimeter; the folds displace both skins rather than inflating an
+// elliptical leaf. End caps keep every painted blade a closed volume.
 // This is used for sword leaves, erect iris standards and drooping iris falls.
 function foldedBlade({ center, width, thickness, rows = 24, sides = 12, twist = 0, phase = 0, fold = .006, petal = false }) {
   const positions = [], uvs = [], indices = [], stride = sides + 1;
@@ -24,16 +25,28 @@ function foldedBlade({ center, width, thickness, rows = 24, sides = 12, twist = 
     const angle = twist * Math.sin(t * 2.2) + .06 * Math.sin(t * 5 + phase);
     const b = across.clone().multiplyScalar(Math.cos(angle)).addScaledVector(normal, Math.sin(angle));
     const n = normal.clone().multiplyScalar(Math.cos(angle)).addScaledVector(across, -Math.sin(angle));
-    const envelope = Math.sin(Math.PI * t), profile = Math.max(.002, envelope ** (petal ? .42 : .50)) * (petal ? .67 + t * .52 : .90 - t * .20);
+    const envelope = Math.sin(Math.PI * t), profile = Math.max(petal ? .045 : .012, envelope ** (petal ? .42 : .50)) * (petal ? .67 + t * .52 : .90 - t * .20);
     for (let side = 0; side <= sides; side++) {
-      const a = side / sides * TAU, u = Math.cos(a), face = Math.sin(a);
-      const asymmetry = 1 + .17 * Math.sin(t * 5.1 + phase + u * .7) + .09 * Math.cos(t * 11 + u * 2);
-      const x = u * width * profile * asymmetry;
-      const dragged = Math.cos(u * Math.PI * 2.3 + .37 * Math.sin(t * 4 + phase)) * fold * 1.65 * envelope;
-      const rolledEdge = Math.exp(-(((u - .73) / .27) ** 2)) * fold * 3.1 * envelope;
-      const loadedEnd = Math.exp(-(((t - .76) / .18) ** 2));
-      const z = Math.sign(face) * Math.abs(face) ** .74 * thickness * profile * (1.55 + loadedEnd * .55) + dragged + rolledEdge;
+      const a = side / sides * TAU, cosine = Math.cos(a), sine = Math.sin(a), u = Math.abs(cosine) < 1e-10 ? 0 : cosine, face = Math.abs(sine) < 1e-10 ? 0 : sine;
+      // A low superellipse exponent leaves broad faces with a small rounded
+      // bevel. The profile stays narrow enough to read as iris anatomy.
+      const acrossLoad = Math.sign(u) * Math.abs(u) ** .62;
+      const asymmetry = 1 + .14 * Math.sin(t * 5.1 + phase + u * .7) + .07 * Math.sin(t * 10.4 + phase * .4) * (u + .4);
+      const x = acrossLoad * width * profile * asymmetry * (petal ? 1.04 : 1.10);
+      const flow = acrossLoad + .10 * Math.sin(t * 3.1 + phase);
+      const ridge = Math.exp(-(((flow + .32) / .26) ** 2));
+      const furrow = Math.exp(-(((flow - .17) / .19) ** 2));
+      const dragged = (ridge * 2.45 - furrow * .78) * fold * envelope;
+      const rolledEdge = Math.exp(-(((acrossLoad - .78) / .20) ** 2)) * fold * (2.0 + .55 * Math.sin(t * 4.4 + phase)) * envelope;
+      const lowerEdge = Math.exp(-(((acrossLoad + .82) / .17) ** 2)) * fold * .54 * envelope;
+      const loadedEnd = Math.exp(-(((t - .72) / .17) ** 2));
+      const rimLoad = Math.exp(-(((acrossLoad - .78) / .20) ** 2));
+      const skin = thickness * profile * (1.02 + loadedEnd * .18 + rimLoad * .48);
+      const z = Math.sign(face) * Math.abs(face) ** .24 * skin + (dragged + rolledEdge) * (.84 + face * .16) - lowerEdge;
       const point = c.clone().addScaledVector(b, x).addScaledVector(n, z);
+      // Dragging the loaded rim slightly back along the blade produces an
+      // asymmetric edge silhouette without a detached bead at the tip.
+      point.addScaledVector(tangent, -thickness * .38 * envelope * Math.exp(-(((acrossLoad - .73) / .23) ** 2)));
       positions.push(point.x, point.y, point.z); uvs.push(side / sides, t);
       if (row < rows && side < sides) { const i = row * stride + side; indices.push(i, i + stride, i + 1, i + 1, i + stride, i + stride + 1); }
     }
@@ -57,32 +70,46 @@ function foldedBlade({ center, width, thickness, rows = 24, sides = 12, twist = 
     normal.fromBufferAttribute(normals, a).add(new THREE.Vector3().fromBufferAttribute(normals, b)).normalize();
     normals.setXYZ(a, normal.x, normal.y, normal.z); normals.setXYZ(b, normal.x, normal.y, normal.z);
   }
+  geometry.userData.paintStroke = { phase, petal, stem: false };
   return geometry;
 }
 
 function curvedStem(points, baseRadius = .007, tipRadius = .003, segments = 16, sides = 8) {
   const curve = new THREE.CatmullRomCurve3(points.map(v3));
   const geometry = new THREE.CylinderGeometry(tipRadius, baseRadius, 1, sides, segments, false);
-  const positions = geometry.attributes.position;
+  const positions = geometry.attributes.position, phase = points.length * .71 + points.at(-1)[1] * 2.3 + baseRadius * 40;
   for (let i = 0; i < positions.count; i++) {
     const t = clamp(positions.getY(i) + .5, 0, 1), c = curve.getPoint(t), tangent = curve.getTangent(t).normalize();
     const xAxis = new THREE.Vector3(1, 0, 0).addScaledVector(tangent, -tangent.x).normalize();
     const zAxis = xAxis.clone().cross(tangent).normalize();
-    c.addScaledVector(xAxis, positions.getX(i)).addScaledVector(zAxis, positions.getZ(i)); positions.setXYZ(i, c.x, c.y, c.z);
+    const radius = THREE.MathUtils.lerp(baseRadius, tipRadius, t), rawU = clamp(positions.getX(i) / radius, -1, 1), rawV = clamp(positions.getZ(i) / radius, -1, 1), u = Math.abs(rawU) < 1e-7 ? 0 : rawU, v = Math.abs(rawV) < 1e-7 ? 0 : rawV, envelope = Math.sin(t * Math.PI);
+    const x = Math.sign(u) * Math.abs(u) ** .62 * radius * (1.63 + .13 * Math.sin(t * 4.1 + phase));
+    const ridge = radius * .34 * Math.exp(-(((u + .28) / .31) ** 2)) * envelope;
+    const rim = radius * .29 * Math.exp(-(((u - .73) / .22) ** 2)) * envelope;
+    const z = Math.sign(v) * Math.abs(v) ** .30 * radius * .76 + ridge + rim;
+    c.addScaledVector(xAxis, x).addScaledVector(zAxis, z); positions.setXYZ(i, c.x, c.y, c.z);
   }
-  geometry.computeVertexNormals(); return geometry;
+  geometry.computeVertexNormals(); geometry.userData.paintStroke = { phase, stem: true }; return geometry;
 }
 
 function plantBuilder() {
   const parts = [], matrix = new THREE.Matrix4(), quaternion = new THREE.Quaternion();
   return {
     add(geometry, bottomColor, topColor = bottomColor, position = [0, 0, 0], rotation = [0, 0, 0], scale = [1, 1, 1]) {
-      const low = new THREE.Color(bottomColor), high = new THREE.Color(topColor), color = new THREE.Color(), colors = [], uv = geometry.attributes.uv;
+      const low = new THREE.Color(bottomColor), high = new THREE.Color(topColor), color = new THREE.Color(), colors = [], uv = geometry.attributes.uv, stroke = geometry.userData.paintStroke;
       for (let i = 0; i < geometry.attributes.position.count; i++) {
         const t = uv?.getY(i) ?? .5, u = uv?.getX(i) ?? .5;
-        color.copy(low).lerp(high, clamp(t * .86 + .05, 0, 1));
-        const across = Math.cos(u * TAU), ridge = .5 + .5 * Math.cos(across * Math.PI * 2.3 + .37 * Math.sin(t * 4));
-        color.multiplyScalar(.72 + .30 * ridge + .10 * Math.sin(t * 5.3 + across * 2.1)); colors.push(color.r, color.g, color.b);
+        if (stroke) {
+          const raw = stroke.stem ? Math.sin(u * TAU) : Math.cos(u * TAU), across = Math.sign(raw) * Math.abs(raw) ** .62;
+          const flow = across + .10 * Math.sin(t * 3.1 + stroke.phase), ridge = Math.exp(-(((flow + .32) / .26) ** 2));
+          const furrow = Math.exp(-(((flow - .17) / .19) ** 2)), rim = Math.exp(-(((across - .78) / .20) ** 2));
+          // The dragged light pigment follows the real raised knife load.
+          // Broad bands preserve the blue/green/gold identity at every LOD.
+          const loaded = THREE.MathUtils.smoothstep(t, .10, .90);
+          color.copy(low).lerp(high, clamp(.13 + loaded * .58 + ridge * .23 + rim * .14, 0, 1));
+          color.multiplyScalar(.93 + .07 * ridge + .05 * rim - .13 * furrow * Math.sin(t * Math.PI));
+        } else color.copy(low).lerp(high, clamp(t * .86 + .05, 0, 1));
+        colors.push(color.r, color.g, color.b);
       }
       geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
       quaternion.setFromEuler(new THREE.Euler(...rotation)); matrix.compose(v3(position), quaternion, v3(scale));

@@ -1,0 +1,182 @@
+{
+  "version": 17,
+  "passed": true,
+  "scope": "CPU generic leaf/grass UV extension across all four actual worlds, high/auto/low and coarse-pointer branches. Geometry byte comparison against committed pre-extension factories; folded cosine interpolation and seam value checks; mixed original brushMat shader variants; tracked extension resource disposal. No rendering, GLSL linking, derivative continuity or visual validation.",
+  "sourceHashes": {
+    "src/render/worlds.js": "69ee23c66feabaa41d9b1bd6f29bb437eb90ee2facde46b3fceaeb2a2c85a413",
+    "src/render/oil-material.js": "fd4021d67d3b6264beeefbf9a074b8c227988f86343f4643eb949aa02615f7f7",
+    "src/render/botanical-sculptures.js": "82c7f5e11e4486b77bcb8a65c7f71375c23c48639185d5edffe177be86f21820"
+  },
+  "factoryChecks": [
+    {
+      "label": "leaf-high",
+      "vertices": 197,
+      "triangles": 360,
+      "positionIndexNormalUnchanged": true,
+      "uvCount": 197,
+      "maximumFoldedInterpolationError": 0
+    },
+    {
+      "label": "grass-high",
+      "vertices": 119,
+      "triangles": 208,
+      "positionIndexNormalUnchanged": true,
+      "uvCount": 119,
+      "maximumFoldedInterpolationError": 0
+    },
+    {
+      "label": "grass-middle",
+      "vertices": 38,
+      "triangles": 60,
+      "positionIndexNormalUnchanged": true,
+      "uvCount": 38,
+      "maximumFoldedInterpolationError": 0
+    },
+    {
+      "label": "grass-low",
+      "vertices": 17,
+      "triangles": 24,
+      "positionIndexNormalUnchanged": true,
+      "uvCount": 17,
+      "maximumFoldedInterpolationError": 0
+    },
+    {
+      "label": "leaf-middle",
+      "vertices": 42,
+      "triangles": 80,
+      "positionIndexNormalUnchanged": true,
+      "uvCount": 42,
+      "maximumFoldedInterpolationError": 9.020562075079397e-16
+    },
+    {
+      "label": "leaf-low",
+      "vertices": 20,
+      "triangles": 36,
+      "positionIndexNormalUnchanged": true,
+      "uvCount": 20,
+      "maximumFoldedInterpolationError": 5.422433246859981e-8
+    },
+    {
+      "label": "petal-middle",
+      "vertices": 42,
+      "triangles": 80,
+      "positionIndexNormalUnchanged": true,
+      "uvCount": 42,
+      "maximumFoldedInterpolationError": 9.020562075079397e-16
+    },
+    {
+      "label": "petal-low",
+      "vertices": 20,
+      "triangles": 36,
+      "positionIndexNormalUnchanged": true,
+      "uvCount": 20,
+      "maximumFoldedInterpolationError": 5.422433246859981e-8
+    },
+    {
+      "label": "stroke-middle",
+      "vertices": 42,
+      "triangles": 80,
+      "positionIndexNormalUnchanged": true,
+      "uvCount": 42,
+      "maximumFoldedInterpolationError": 9.020562075079397e-16
+    },
+    {
+      "label": "stroke-low",
+      "vertices": 20,
+      "triangles": 36,
+      "positionIndexNormalUnchanged": true,
+      "uvCount": 20,
+      "maximumFoldedInterpolationError": 5.422433246859981e-8
+    }
+  ],
+  "maximumCosineError": 5.422433246859981e-8,
+  "maximumSeamValueError": 0,
+  "seamPairs": 37,
+  "worlds": [
+    {
+      "id": 0,
+      "genericBatches": 228,
+      "flaggedBatches": 87,
+      "flaggedInstances": 49616,
+      "families": [
+        "grass",
+        "leaf"
+      ],
+      "observedLods": [
+        "grass-high",
+        "grass-low",
+        "grass-middle",
+        "leaf-high",
+        "leaf-low",
+        "leaf-middle"
+      ],
+      "mixedSourceMaterialPairs": 87,
+      "generatedMaterials": 4,
+      "trackedResources": 97,
+      "trackedAllDisposedExactlyOnce": true
+    },
+    {
+      "id": 1,
+      "genericBatches": 306,
+      "flaggedBatches": 132,
+      "flaggedInstances": 55285,
+      "families": [
+        "grass",
+        "leaf"
+      ],
+      "observedLods": [
+        "grass-high",
+        "grass-low",
+        "grass-middle",
+        "leaf-high",
+        "leaf-low",
+        "leaf-middle"
+      ],
+      "mixedSourceMaterialPairs": 132,
+      "generatedMaterials": 5,
+      "trackedResources": 143,
+      "trackedAllDisposedExactlyOnce": true
+    },
+    {
+      "id": 2,
+      "genericBatches": 141,
+      "flaggedBatches": 71,
+      "flaggedInstances": 6787,
+      "families": [
+        "grass",
+        "leaf"
+      ],
+      "observedLods": [
+        "grass-high",
+        "grass-low",
+        "grass-middle",
+        "leaf-high",
+        "leaf-low",
+        "leaf-middle"
+      ],
+      "mixedSourceMaterialPairs": 71,
+      "generatedMaterials": 4,
+      "trackedResources": 81,
+      "trackedAllDisposedExactlyOnce": true
+    },
+    {
+      "id": 3,
+      "genericBatches": 228,
+      "flaggedBatches": 57,
+      "flaggedInstances": 48941,
+      "families": [
+        "leaf"
+      ],
+      "observedLods": [
+        "leaf-high",
+        "leaf-low",
+        "leaf-middle"
+      ],
+      "mixedSourceMaterialPairs": 57,
+      "generatedMaterials": 4,
+      "trackedResources": 64,
+      "trackedAllDisposedExactlyOnce": true
+    }
+  ],
+  "failures": []
+}

@@ -64,6 +64,33 @@ vec4 oilSurface(vec3 p, vec3 n, out vec3 paintedColor) {
   paintedColor = colorX * weight.x + colorY * weight.y + colorZ * weight.z;
   return surfaceX * weight.x + surfaceY * weight.y + surfaceZ * weight.z;
 }
+
+#ifdef USE_OIL_BLADE_UV
+vec4 oilBlade(vec2 uv, out vec3 paintedColor) {
+  // A blade is a dragged load: a few broad faces, a folded lip and fine
+  // bristles running together. Its brush field follows the closed blade UV,
+  // including the underside, instead of cutting across a small leaf in XYZ.
+  float across = cos(uv.x * 6.283185307);
+  float along = uv.y;
+  float drag = across + sin(along * 4.3) * .065 + sin(along * 9.1) * .012;
+  float faceA = smoothstep(-.77, -.48, drag) - smoothstep(.06, .27, drag);
+  float faceB = smoothstep(.14, .34, drag) - smoothstep(.70, .91, drag);
+  float lip = exp(-pow((drag - .63) / .11, 2.));
+  float footprint = max(fwidth(across), fwidth(along));
+  float bristleFade = 1. - smoothstep(.025, .09, footprint);
+  float bristle = sin(drag * 43. + sin(along * 4.1) * .9) * .0035 * bristleFade;
+  // Sample a complete dragged stroke directly. The spatial patch blender is
+  // useful for broad terrain, but fragments the stroke inside a tiny petal.
+  vec2 bladeGuideUv = vec2(.48 + across * .16, .10 + along * .62);
+  vec3 guide = texture2D(uOilPaint, bladeGuideUv).rgb;
+  paintedColor = texture2D(uOilPigmentAtlas, bladeGuideUv).rgb;
+  float load = .33 + faceA * .25 + faceB * .13 + lip * .07;
+  float draggedPaint = mix(load, guide.y, .80 * uOilPaintReady);
+  float height = draggedPaint + bristle;
+  float groove = (1. - smoothstep(.27, .48, draggedPaint)) * .16;
+  return vec4(height, draggedPaint, groove, .5 + drag * .28);
+}
+#endif
 `;
 
 const profiles = {
@@ -149,9 +176,9 @@ export function applyOilMaterials(scene, { richPigment = false, stochasticPigmen
       if (palette) { material.color.multiply(palette); material.map = null; }
       material.bumpMap = null;
       material.normalMap = null;
-      material.roughness = blade ? .36 : profile.roughness;
-      material.clearcoat = blade ? .58 : profile.coat;
-      material.clearcoatRoughness = blade ? .22 : profile.glaze ?? .27;
+      material.roughness = blade ? .40 : profile.roughness;
+      material.clearcoat = blade ? .55 : profile.coat;
+      material.clearcoatRoughness = blade ? .27 : profile.glaze ?? .27;
       material.ior = 1.47;
       material.specularIntensity = .90;
       material.onBeforeCompile = shader => {
@@ -201,16 +228,10 @@ export function applyOilMaterials(scene, { richPigment = false, stochasticPigmen
         shader.fragmentShader = shader.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
           vec3 authoredLoad = diffuseColor.rgb;
           vec3 paintedColor;
-          vec4 oil = oilSurface(vOilPosition * uOilScale, normalize(vOilRestNormal), paintedColor);
           #ifdef USE_OIL_BLADE_UV
-            // One continuous brush direction follows each deposited blade.
-            // Cosine wraps both faces without a discontinuity at the UV seam.
-            vec3 bladeColor;
-            vec4 bladePaint = oilSwipe(vec2(cos(vOilBladeUv.x * 6.283185307) * .24, vOilBladeUv.y * .18), bladeColor);
-            // Broad dragged ridges carry the blade. Suppress the fine guide's
-            // pinprick highlights when it is stretched over a small flower.
-            oil.x = mix(oil.x, bladePaint.y, .50);
-            oil.y = mix(oil.y, bladePaint.y, .35);
+            vec4 oil = oilBlade(vOilBladeUv, paintedColor);
+          #else
+            vec4 oil = oilSurface(vOilPosition * uOilScale, normalize(vOilRestNormal), paintedColor);
           #endif
           vec3 pigmentMix = mix(vec3(.78, .93, 1.19), vec3(1.21, 1.02, .76), oil.w);
           diffuseColor.rgb *= mix(vec3(1.), pigmentMix, uOilPigment);
@@ -239,6 +260,12 @@ export function applyOilMaterials(scene, { richPigment = false, stochasticPigmen
           // the scalar leaves its hue intact and follows the same local relief.
           float leafStroke = smoothstep(.18, .72, oil.y * .8 + oil.x * .2);
           diffuseColor.rgb *= mix(1., mix(.65, 1.15, leafStroke), uOilLeafValue);
+          #ifdef USE_OIL_BLADE_UV
+            // Colour remains pigment on the broad load. Gloss is confined to
+            // the raised lip below, rather than washing the whole petal white.
+            float draggedValue = smoothstep(.30, .60, oil.y);
+            diffuseColor.rgb = authoredLoad * mix(.57, 1.38, draggedValue);
+          #endif
           diffuseColor.rgb *= 1. - oil.z * .065;
           // Keep the artist's actual pigment values in broad paint deposits.
           // The physical relief still supplies view-dependent light and shadow.
@@ -271,9 +298,14 @@ export function applyOilMaterials(scene, { richPigment = false, stochasticPigmen
             ${surface === 'canyon' ? `float paintRim = smoothstep(.45, .69, oil.x);
             material.clearcoat = mix(.26, .55, paintRim);
             material.clearcoatRoughness = mix(.28, .22, paintRim);` : ''}
+            #ifdef USE_OIL_BLADE_UV
+              float loadedLip = exp(-pow((cos(vOilBladeUv.x * 6.283185307) + sin(vOilBladeUv.y * 4.3) * .065 + sin(vOilBladeUv.y * 9.1) * .012 - .63) / .14, 2.));
+              material.clearcoat = mix(.25, .72, loadedLip);
+              material.clearcoatRoughness = mix(.31, .18, loadedLip);
+            #endif
           #endif`);
       };
-      material.customProgramCacheKey = () => `pigment-viscous-atlas-v14-${surface}-${moving}-${richPigment}-${anchored}-${stochasticPigment}-${blade}`;
+      material.customProgramCacheKey = () => `pigment-viscous-atlas-v17-${surface}-${moving}-${richPigment}-${anchored}-${stochasticPigment}-${blade}`;
       material.needsUpdate = true;
       variants.set(key, material);
       return material;

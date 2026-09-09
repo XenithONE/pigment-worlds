@@ -126,18 +126,21 @@ function makeCompactPaintGeometry(kind, veryLow = false) {
     const r = Math.sin(Math.PI * t) ** (petal ? .58 : kind === 'leaf' ? .45 : .62);
     return new THREE.Vector3(Math.cos(a) * r * width + (petal ? .06 * Math.sin(Math.PI * t) + .10 * t * t : kind === 'leaf' ? .15 * Math.sin(Math.PI * t) + .14 * t * t : 0), petal ? t * .95 - .19 * t ** 4 : t - .5 - (kind === 'leaf' ? .25 * t ** 4 : 0), (petal ? .18 * Math.sin(Math.PI * t) + t * t * .40 : kind === 'leaf' ? .34 * t * t + .045 * Math.sin(Math.PI * t) : Math.sin(Math.PI * t) * curve) + Math.sin(a) * r * depth);
   };
-  const bottom = sample(0, 0), top = sample(1, 0), points = [bottom.x, bottom.y, bottom.z], normals = [0, -1, 0], indices = [];
+  const bottom = sample(0, 0), top = sample(1, 0), points = [bottom.x, bottom.y, bottom.z], normals = [0, -1, 0], indices = [], uv = [.25, 0];
   for (const t of levels) for (let side = 0; side < sides; side++) {
     const a = side / sides * TAU, pos = sample(t, a), normal = sample(t + .001, a).sub(sample(t - .001, a)).cross(sample(t, a + .001).sub(sample(t, a - .001))).normalize();
     points.push(pos.x, pos.y, pos.z); normals.push(normal.x, normal.y, normal.z);
+    // The blade shader uses cos(TAU * u) on both skins. Folding this periodic
+    // coordinate keeps the welded coarse seam continuous without extra rings.
+    const around = side / sides; uv.push(around <= .5 ? around : 1 - around, t);
   }
-  const end = points.length / 3; points.push(top.x, top.y, top.z); normals.push(0, 1, 0);
+  const end = points.length / 3; points.push(top.x, top.y, top.z); normals.push(0, 1, 0); uv.push(.25, 1);
   for (let side = 0; side < sides; side++) {
     const next = (side + 1) % sides; indices.push(0, 1 + side, 1 + next);
     for (let row = 0; row < levels.length - 1; row++) { const a = 1 + row * sides + side, b = 1 + row * sides + next; indices.push(a, a + sides, b, b, a + sides, b + sides); }
     const last = 1 + (levels.length - 1) * sides; indices.push(end, last + next, last + side);
   }
-  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(points, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3)); g.setIndex(indices); return g;
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(points, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.setIndex(indices); return g;
 }
 
 export function createWorld(id, { skyTextures = [], portalTextures = [], reducedMotion = false, detailLevel = 'auto' } = {}) {
@@ -202,6 +205,7 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
     for (const { name, key, geometry, mat, items } of batches.values()) {
       const m = new THREE.InstancedMesh(geometry, mat, items.length);
       m.name = key; m.userData.pigmentBatch = name;
+      if (geometry === leafGeo || geometry === grassGeo) m.userData.pigmentBladeUV = true;
       m.receiveShadow = true; m.castShadow = !['star-rings', 'pond-brush-marks', 'sea-foam', 'pollen', 'village-windows'].includes(name);
       items.forEach((v, i) => { dummy.position.set(v[0], v[1], v[2]); dummy.scale.set(v[3], v[4], v[5]); dummy.rotation.set(v[6], v[7], v[8]); dummy.updateMatrix(); m.setMatrixAt(i, dummy.matrix); if (v[9]) m.setColorAt(i, color.set(v[9])); });
       m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; m.computeBoundingSphere(); scene.add(m);
