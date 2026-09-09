@@ -2,6 +2,7 @@ import { DataUtils, Vector3 } from 'three';
 import { TessellateModifier } from 'three/addons/modifiers/TessellateModifier.js';
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 import { oilPaintUniform } from './paint-texture.js';
+import { paintCoordinates } from './paint-coordinates.js';
 
 let sourceData, sourceSize, heightField;
 function prepareHeight() {
@@ -15,8 +16,7 @@ function mirrored(value) {
   const repeat = ((value % 2) + 2) % 2;
   return repeat <= 1 ? repeat : 2 - repeat;
 }
-function swipe(x, y) {
-  x += Math.sin(y * 3.1 + Math.sin(y * .79)) * .038;
+function sampleHeight(x, y) {
   const u = mirrored(x) * sourceSize - .5, v = mirrored(y) * sourceSize - .5;
   const ix = Math.floor(u), iy = Math.floor(v), tx = u - ix, ty = v - iy;
   const clamp = n => Math.max(0, Math.min(sourceSize - 1, n));
@@ -25,11 +25,20 @@ function swipe(x, y) {
   const b = heightField[y1 * sourceSize + x0] * (1 - tx) + heightField[y1 * sourceSize + x1] * tx;
   return a * (1 - ty) + b * ty;
 }
+const coordinateTaps = new Float64Array(9);
+function swipe(x,y,stochastic) {
+  x += Math.sin(y * 3.1 + Math.sin(y * .79)) * .038;
+  if(!stochastic)return sampleHeight(x,y);
+  paintCoordinates(x,y,coordinateTaps);
+  let height=0;
+  for(let i=0;i<9;i+=3)height+=sampleHeight(coordinateTaps[i],coordinateTaps[i+1])*coordinateTaps[i+2];
+  return height;
+}
 
 // Focal rock shelves carry actual relief as well as the material's finer
 // bristles. This changes their silhouettes and sun/contact shadows in 3D.
 // Flora, distant terrain and architecture retain their own specialised LODs.
-export function applySculptedRelief(scene, { richPigment = false } = {}) {
+export function applySculptedRelief(scene, { richPigment = false, stochasticPigment = false } = {}) {
   prepareHeight();
   if (sourceSize < 2) return { dispose() {} };
   const originals = [], modifier = new TessellateModifier(.14, 3), pathModifier = new TessellateModifier(.075, 4), normal = new Vector3();
@@ -49,15 +58,16 @@ export function applySculptedRelief(scene, { richPigment = false } = {}) {
       normal.fromBufferAttribute(normals, i).normalize();
       const x = positions.getX(i), y = positions.getY(i), z = positions.getZ(i);
       const wx = Math.abs(normal.x) ** 5, wy = Math.abs(normal.y) ** 5, wz = Math.abs(normal.z) ** 5;
-      const scaleXZ = richPigment ? (path ? .32 : canyon ? .16 : .30) : path ? .17 : terrain ? .45 : .26;
-      const scaleY = richPigment ? (canyon ? .13 : .23) : terrain ? .32 : .19;
-      const height = path ? swipe(x * scaleXZ, z * scaleXZ) : (swipe(z * scaleXZ, y * scaleY) * wx + swipe(x * scaleXZ, z * scaleXZ) * wy + swipe(x * scaleXZ, y * scaleY) * wz) / Math.max(.0001, wx + wy + wz);
+      const scaleXZ = richPigment ? (path ? .32 : canyon ? .095 : .30) : path ? .17 : terrain ? .45 : .26;
+      const scaleY = richPigment ? (canyon ? .085 : .23) : terrain ? .32 : .19;
+      const height = path ? swipe(x * scaleXZ, z * scaleXZ, stochasticPigment) : (swipe(z * scaleXZ, y * scaleY, stochasticPigment) * wx + swipe(x * scaleXZ, z * scaleXZ, stochasticPigment) * wy + swipe(x * scaleXZ, y * scaleY, stochasticPigment) * wz) / Math.max(.0001, wx + wy + wz);
       // A bank's upper and lower joins stay attached to their surrounding
       // terrain; its middle carries deeper deposited paint geometry.
       const u = canyonFace ? geometry.attributes.uv.getX(i) : .5;
       const smoothEdge = t => { t = Math.max(0, Math.min(1, t / .1)); return t * t * (3 - 2 * t); };
       const edge = canyonFace ? smoothEdge(u) * smoothEdge(1 - u) : 1;
-      const amount = path ? Math.max(0, height - .25) * (richPigment ? .15 : .24) : (height - .48) * (canyonFace ? .48 * edge : terrain ? .24 : .19);
+      const amount = path ? Math.max(0, height - .25) * (richPigment ? .15 : .24)
+        : canyonFace ? Math.max(0,height-.18)*2.0*edge : (height-.48)*(terrain?.55:.19);
       // All path layers share the same vertical paint field, preserving their
       // order while raising real pigment ridges above the walkable substrate.
       positions.setXYZ(i, x + (path ? 0 : normal.x * amount), y + (path ? amount : normal.y * amount), z + (path ? 0 : normal.z * amount));

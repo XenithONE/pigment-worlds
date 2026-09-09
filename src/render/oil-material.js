@@ -1,5 +1,6 @@
 import { Color, MeshPhysicalMaterial, MeshStandardMaterial, SRGBColorSpace, Vector3 } from 'three';
 import { oilPaintReadyUniform, oilPaintUniform, oilPigmentUniform } from './paint-texture.js';
+import { PAINT_COORDINATES_GLSL } from './paint-coordinates.js';
 export { loadOilPaintTexture } from './paint-texture.js';
 
 // Coordinates belong to the undeformed object, not the screen or camera.
@@ -18,12 +19,22 @@ uniform vec3 uOilColorWeights;
 uniform float uOilFold;
 uniform float uOilLeafValue;
 uniform float uOilDirectPigment;
+${PAINT_COORDINATES_GLSL}
 
 vec4 oilSwipe(vec2 p, out vec3 paintedColor) {
   float bend = sin(p.y * 3.1 + sin(p.y * .79)) * .038;
   vec2 q = vec2(p.x + bend, p.y);
-  vec3 relief = texture2D(uOilPaint, q).rgb;
-  paintedColor = texture2D(uOilPigmentAtlas, q).rgb;
+  vec3 relief;
+  #ifdef OIL_PATCH_MAPPING
+    vec2 uv0, uv1, uv2; vec3 weights; mat2 j0, j1, j2;
+    paintCoordinates(q, uv0, uv1, uv2, weights, j0, j1, j2);
+    vec2 gx=dFdx(q), gy=dFdy(q);
+    relief = textureGrad(uOilPaint, uv0, j0*gx, j0*gy).rgb * weights.x + textureGrad(uOilPaint, uv1, j1*gx, j1*gy).rgb * weights.y + textureGrad(uOilPaint, uv2, j2*gx, j2*gy).rgb * weights.z;
+    paintedColor = textureGrad(uOilPigmentAtlas, uv0, j0*gx, j0*gy).rgb * weights.x + textureGrad(uOilPigmentAtlas, uv1, j1*gx, j1*gy).rgb * weights.y + textureGrad(uOilPigmentAtlas, uv2, j2*gx, j2*gy).rgb * weights.z;
+  #else
+    relief = texture2D(uOilPaint, q).rgb;
+    paintedColor = texture2D(uOilPigmentAtlas, q).rgb;
+  #endif
   float phase = (p.x + bend * 1.6) * 19.0 + sin(p.y * 2.1) * .42;
   float fold = pow(.5 + .5 * sin(phase), 2.2);
   float macro = sin(p.y * 2.2 + sin(p.x * 1.7)) * .055;
@@ -62,6 +73,7 @@ const profiles = {
   rock:         { scale: [.26, .19, .26], depth: .095, pigment: .62, color: [.43, .34, .38], fold: .70, roughness: .40, coat: .62, glaze: .16 },
   bark:         { scale: [.62, .16, .62], depth: .060, pigment: .14, color: [.04, .035, .18], fold: .40, roughness: .47, coat: .36 },
   foliage:      { scale: [1.00, .50, 1.00], depth: .015, pigment: .08, color: [.025, .025, .10], fold: .22, roughness: .40, coat: .42 },
+  crown:        { scale: [.80, .65, .80], depth: .040, pigment: 0, color: [0, 0, .035], fold: 0, roughness: .34, coat: .55, glaze: .20 },
   gold:         { scale: [.60, .42, .60], depth: .016, pigment: .06, color: [.018, .012, .10], fold: .15, roughness: .38, coat: .32 },
   architecture: { scale: [.32, .28, .32], depth: .042, pigment: .08, color: [.035, .025, .12], fold: .22, roughness: .49, coat: .30 },
   water:        { scale: [.15, .12, .15], depth: .055, pigment: .15, color: [.08, .05, .16], fold: .20, roughness: .28, coat: .64 },
@@ -97,12 +109,12 @@ function averageCanvasPigment(material) {
 
 const richProfiles = {
   ground: { scale: [.34, .28, .34], direct: .60, depth: .052, roughness: .40, coat: .52 },
-  canyon: { scale: [.16, .13, .16], direct: .55, depth: .11, roughness: .40, coat: .55 },
+  canyon: { scale: [.095, .085, .095], direct: .72, depth: .17, roughness: .40, coat: .55 },
   path: { scale: [.32, .32, .32], direct: .85, depth: .065, roughness: .35, coat: .64 },
   rock: { scale: [.30, .23, .30], direct: .75, depth: .095, roughness: .37, coat: .62 },
 };
 
-export function applyOilMaterials(scene, { richPigment = false } = {}) {
+export function applyOilMaterials(scene, { richPigment = false, stochasticPigment = false } = {}) {
   const coatings = new Map(), originals = [], time = { value: 0 };
   scene.traverse(object => {
     if (!object.isMesh) return;
@@ -121,6 +133,7 @@ export function applyOilMaterials(scene, { richPigment = false } = {}) {
       const material = new MeshPhysicalMaterial();
       MeshStandardMaterial.prototype.copy.call(material, original);
       material.defines = { STANDARD: '', PHYSICAL: '' };
+      if(stochasticPigment) material.defines.OIL_PATCH_MAPPING = '';
       if(anchored) material.defines.USE_OIL_REST = '';
       material.name = `${original.name || surface} / viscous oil`;
       material.userData = { ...original.userData, pigmentSurface: surface };
@@ -225,7 +238,7 @@ export function applyOilMaterials(scene, { richPigment = false } = {}) {
             material.clearcoatRoughness = clamp(material.clearcoatRoughness + (1. - oil.y) * .10 - oil.z * .08, .14, .4);
           #endif`);
       };
-      material.customProgramCacheKey = () => `pigment-viscous-atlas-v11-${surface}-${moving}-${richPigment}-${anchored}`;
+      material.customProgramCacheKey = () => `pigment-viscous-atlas-v12-${surface}-${moving}-${richPigment}-${anchored}-${stochasticPigment}`;
       material.needsUpdate = true;
       variants.set(key, material);
       return material;

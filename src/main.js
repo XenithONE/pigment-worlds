@@ -4,7 +4,6 @@ import { createPaintPipeline, configurePaintShadows } from './render/paint-pipel
 import { createWorld } from './render/worlds.js';
 import { applyOilMaterials, loadOilPaintTexture } from './render/oil-material.js';
 import { applySculptedRelief } from './render/surface-relief.js';
-import { loadPaintedFloraAtlas } from './render/painted-flora.js';
 import { loadPaintedVistas, addPaintedVistas } from './render/painted-vistas.js';
 import { loadCanyonVista, addCanyonVista } from './render/canyon-vista.js';
 import { WORLD_INFO, SAVE_KEY, createJourney, moveOnGround } from './simulation/journey.js';
@@ -96,10 +95,10 @@ function setWorld(id){
   });
   const disposeWorld=world.dispose;
   world.dispose=()=>{vista.dispose();canyonVista?.dispose();disposeWorld();};
-  const richPigment=true;
-  world.relief=applySculptedRelief(world.scene,{richPigment});
+  const richPigment=true,stochasticPigment=true;
+  world.relief=applySculptedRelief(world.scene,{richPigment,stochasticPigment});
   world.memoryMeshes.forEach(group=>group.traverse(object=>{object.castShadow=false;}));
-  world.oil=applyOilMaterials(world.scene,{richPigment});
+  world.oil=applyOilMaterials(world.scene,{richPigment,stochasticPigment});
   world.scene.environment=environmentMaps[id].texture;
   world.scene.environmentIntensity=id===0?.22:.18;
   // A low, warm key skims the raised paint; restrained sky fill leaves cool
@@ -265,7 +264,7 @@ async function boot(){
     portalTextures=await Promise.all(WORLD_INFO.map(async info=>{const texture=await loader.loadAsync(`${import.meta.env.BASE_URL}art/${info.sky.replace('-sky','-portal')}.webp`);texture.colorSpace=THREE.SRGBColorSpace;return texture;}));
     const pmrem=new THREE.PMREMGenerator(renderer);environmentMaps=skyTextures.map(texture=>pmrem.fromEquirectangular(texture));pmrem.dispose();
     $('#loading-status').textContent='厚い絵具に、光を入れています';
-    await Promise.all([loadOilPaintTexture(),loadPaintedFloraAtlas(),loadPaintedVistas(),loadCanyonVista()]);
+    await Promise.all([loadOilPaintTexture(),loadPaintedVistas(),loadCanyonVista()]);
     setWorld(0);await renderer.compileAsync(world.scene,camera);runtime.ready=true;
     $('#start-button').disabled=false;$('#start-button span').textContent='旅をはじめる';$('#loading-status').textContent='';
     requestAnimationFrame(animate);

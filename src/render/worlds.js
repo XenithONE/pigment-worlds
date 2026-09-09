@@ -107,12 +107,12 @@ function makePetalGeometry() {
   for (let side = 0; side < sides; side++) { indices.push(lower, side, side + 1); const end = (ts.length - 1) * (sides + 1); indices.push(upper, end + side + 1, end + side); }
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(points, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3)); g.setIndex(indices); return g;
 }
-// Closed 24- and 8-triangle daubs retain their rounded pigment silhouette when
-// their richer near-camera counterpart is only a few pixels tall on screen.
+// Coarser paint loads keep several curved rings. A single diamond ring made
+// enlarged coastal leaves look like folded paper on smaller screens.
 function makeCompactPaintGeometry(kind, veryLow = false) {
   const petal = kind === 'petal', width = petal ? .43 : kind === 'leaf' ? .21 : .47;
   const depth = petal ? .105 : kind === 'leaf' ? .060 : .14, curve = .045;
-  const sides = veryLow ? 4 : 6, levels = veryLow ? [.5] : [.24, .74];
+  const sides = veryLow ? 6 : 8, levels = veryLow ? [.18, .5, .82] : [.10, .26, .48, .71, .90];
   const sample = (t, a) => {
     const r = Math.sin(Math.PI * t) ** (petal ? .58 : kind === 'leaf' ? .45 : .62);
     return new THREE.Vector3(Math.cos(a) * r * width + (petal ? .06 * Math.sin(Math.PI * t) + .10 * t * t : kind === 'leaf' ? .15 * Math.sin(Math.PI * t) + .14 * t * t : 0), petal ? t * .95 - .19 * t ** 4 : t - .5 - (kind === 'leaf' ? .25 * t ** 4 : 0), (petal ? .18 * Math.sin(Math.PI * t) + t * t * .40 : kind === 'leaf' ? .34 * t * t + .045 * Math.sin(Math.PI * t) : Math.sin(Math.PI * t) * curve) + Math.sin(a) * r * depth);
@@ -174,6 +174,7 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
   }
   function stamp(name, geometry, mat, x, y, z, sx, sy, sz, rx, ry, rz, col, groundGrowth = false) {
     if (groundGrowth && groundGrowthGap(x, z)) return;
+    if (id === 2 && name === 'rocks' && x < 4 && z > 2 && z < 23) return;
     if (id === 2 && name === 'fallen-pigment') return;
     if (name === 'grass' && id !== 3) geometry = grassGeo;
     if (id === 2 && name === 'grass') {
@@ -251,7 +252,8 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
   // A wide, gently meandering ribbon is tessellated against the actual ground.
   const pathVertices = [], pathUV = [], pathIndices = [], pathColumns = 15;
   for (let i = 0; i <= 280; i++) {
-    const z = 35 - i * .29, x = pathX(z), width = 1.22 + .08 * Math.sin(i * .19) + .04 * Math.sin(i * .61);
+    const z = 35 - i * (id===2?57/280:.29), x = pathX(z);
+    const width = (1.22 + .08 * Math.sin(i * .19) + .04 * Math.sin(i * .61))*(id===2?Math.max(.06,Math.min(1,(280-i)/15)):1);
     for (let j = 0; j < pathColumns; j++) { const side = j / (pathColumns - 1) * 2 - 1, xx = x + side * width; const ridge = .02 * Math.sin(xx * 19 + z * 3.8) + .014 * Math.sin(xx * 45 - z * 7); pathVertices.push(xx, baseHeight(xx, z) + .06 + ridge * (1 - side * side), z); pathUV.push(j / (pathColumns - 1), i / 55); if (i < 280 && j < pathColumns - 1) { const a = i * pathColumns + j; pathIndices.push(a, a + 1, a + pathColumns, a + pathColumns, a + 1, a + pathColumns + 1); } }
   }
   const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.Float32BufferAttribute(pathVertices, 3)); pg.setAttribute('uv', new THREE.Float32BufferAttribute(pathUV, 2)); pg.setIndex(pathIndices); pg.computeVertexNormals(); mesh(pg, pathMat).name = 'walkable-paint-ribbon';
@@ -563,8 +565,8 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
   const removePaintedFlora = addPaintedFlora(scene, { id, baseHeight, pathX, isPond, isSea });
   const removePaintValley = addPaintValley(scene,{id,pathX,baseHeight});
   const canyon = id === 2 ? addSculptedCanyon(scene) : null;
-  const heroTree = id === 2 ? addPaintedTree(scene,{position:[-8.5,baseHeight(-8.5,-3),-3],seed:5921,scale:.9}) : null;
-  if(heroTree) obstacles.push({x:-8.5,z:-3,radius:1.5});
+  const heroTree = id === 2 ? addPaintedTree(scene,{position:[-9.3,baseHeight(-9.3,3)-.05,3],seed:5921,scale:.82,groundHeight:baseHeight}) : null;
+  if(heroTree) obstacles.push({x:-9.3,z:3,radius:1.5});
   const removeBotanicals = addBotanicalSculptures(scene,{id,baseHeight,pathX,isPond,isSea,density:1.7});
   const canyonPlants = id === 2 ? addCanyonPlanting(scene,{pathX,baseHeight,isPond,clearings:clearingPositions}) : null;
   if(canyonPlants) obstacles.push(...canyonPlants.obstacles);
@@ -573,6 +575,7 @@ export function createWorld(id, { skyTextures = [], portalTextures = [], reduced
   function updateDetail(camera) {
     if (!camera) return;
     removeBotanicals.update?.(camera, detailLevel);
+    removePaintedFlora.update?.(camera, detailLevel);
     canyonPlants?.update(camera, detailLevel);
     const mobileAuto = detailLevel === 'auto' && typeof matchMedia === 'function' && (matchMedia('(pointer: coarse)').matches || matchMedia('(max-width: 700px)').matches);
     const low = detailLevel === 'low' || mobileAuto, high = detailLevel === 'high';

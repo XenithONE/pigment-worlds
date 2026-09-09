@@ -35,12 +35,12 @@ function sweepVolume({ points, radius, width, depth, rows = 60, sides = 24, phas
       if (blade) {
         // Wide palette-knife loads have curled, asymmetrical margins, several
         // broad creases, and a swollen rounded end instead of a leaf point.
-        const envelope = Math.max(.016, Math.sin(Math.PI * t) ** (.35 + .10 * Math.sin(phase)));
+        const envelope = Math.max(crown ? .09 : .016, Math.sin(Math.PI * t) ** (.35 + .10 * Math.sin(phase)));
         const asymmetry = .90 + .18 * Math.sin(t * 4.9 + phase + u * .8) + .075 * Math.sin(t * 13 + u * 2 + phase);
         x = Math.sign(u) * Math.abs(u) ** (crown ? .78 : 1) * width * envelope * asymmetry;
-        const folds = Math.cos(u * 9.2 + .52 * Math.sin(t * 4 + phase)) * depth * (crown ? .32 : .25) * envelope;
-        const curledEdge = Math.exp(-(((u - .70) / .28) ** 2)) * depth * (crown ? .75 : .95) * Math.sin(Math.PI * t);
-        const drag = crown ? depth * .44 * Math.sin(t * 8 + u * 2.3 + phase) * Math.sin(Math.PI * t) : 0;
+        const folds = Math.cos(u * (crown ? 6.2 : 9.2) + .52 * Math.sin(t * 4 + phase)) * depth * (crown ? .48 : .25) * envelope;
+        const curledEdge = Math.exp(-(((u - .70) / .28) ** 2)) * depth * (crown ? 1.12 : .95) * Math.sin(Math.PI * t);
+        const drag = crown ? depth * (.56 * Math.sin(t * 6 + u * 2.3 + phase) + .18 * Math.sin(t * 15 + phase)) * Math.sin(Math.PI * t) : 0;
         z = Math.sign(v) * Math.abs(v) ** (crown ? .62 : 1) * depth * envelope * (.76 + .26 * Math.sin(t * 3.6)) + folds + curledEdge + drag;
       } else {
         const r = typeof radius === 'function' ? radius(t) : THREE.MathUtils.lerp(radius[0], radius[1], t);
@@ -101,7 +101,7 @@ function mergeParts(parts) {
  * fluted branches, raised bark ribbons and overlapping thick paint loads form
  * the complete silhouette. The caller owns positioning and scene lighting.
  */
-export function addPaintedTree(scene, { position = [0, 0, 0], seed = 42719, scale = 1 } = {}) {
+export function addPaintedTree(scene, { position = [0, 0, 0], seed = 42719, scale = 1, groundHeight } = {}) {
   if (!scene?.add || !Array.isArray(position) || position.length !== 3 || !position.every(Number.isFinite) || !Number.isFinite(scale) || scale <= 0) {
     throw new TypeError('A painted tree requires a scene, a finite position and a positive scale.');
   }
@@ -179,71 +179,107 @@ export function addPaintedTree(scene, { position = [0, 0, 0], seed = 42719, scal
     { p: [-.3, 13.7, 2.0], size: [2.0, 1.2, 1.6], shade: 0 },
   ];
   const crownPalette = [
-    ['#722c2a', '#d85b2c'], ['#923526', '#ed7936'],
-    ['#a45327', '#f2ae4c'], ['#c1852d', '#f6cf70'],
+    ['#981b2b', '#ee4838'], ['#b52b23', '#fa6839'],
+    ['#c04422', '#ffa046'], ['#cf7020', '#ffd277'],
   ];
   const supports = branchDefinitions.flatMap(branch => new THREE.CatmullRomCurve3(branch.p.map(vector)).getPoints(35));
-  let leafCount = 0;
+  let leafCount = 0, crownLoads = 0, attachedDrips = 0;
   crowns.forEach((crown, crownIndex) => {
     const palette = crownPalette[crown.shade], p = crown.p, [sx, sy, sz] = crown.size;
     const heart = new THREE.Vector3(p[0], p[1] - sy * .60, p[2]);
     const support = supports.reduce((nearest, point) => point.distanceToSquared(heart) < nearest.distanceToSquared(heart) ? point : nearest, supports[0]);
     const junction = support.clone().lerp(heart, .56).add(new THREE.Vector3(0, .18, 0));
     barkParts.push(sweepVolume({ points: [support.toArray(), junction.toArray(), heart.toArray()], radius: [.14, .065], rows: 18, sides: 10, phase: random() * TAU, flutes: 4, colorA: '#3d2428', colorB: '#8d4b2c' }).geometry);
-    // Eight little boughs spread from each supported heart. Five successive
-    // nodes on each bough bear three overlapping 0.3–0.7 m brush leaves. This
-    // is a dense branching canopy, rather than a shell of detached fragments.
-    for (let bough = 0; bough < 8; bough++) {
-      const angle = bough / 8 * TAU + crownIndex * .38 + (random() - .5) * .20;
+    const deposits = [];
+    // Large folded paint loads interlock through the cluster instead of
+    // surrounding it with a shell of repeated small leaves. Their swept
+    // paths sag, rise and turn independently; no ellipsoid core is hidden here.
+    const largeCount = 5 + crownIndex % 3;
+    for (let load = 0; load < largeCount; load++) {
+      const angle = load * 2.39996 + crownIndex * .61 + random() * .4;
+      const direction = new THREE.Vector3(Math.cos(angle), 0, Math.sin(angle));
+      const sideways = new THREE.Vector3(-direction.z, 0, direction.x);
+      const level = p[1] + sy * (-.08 + random() * .40);
+      const start = new THREE.Vector3(p[0], level, p[2]).addScaledVector(direction, -.48 * sx);
+      const end = new THREE.Vector3(p[0], level - .23 - random() * .27, p[2]).add(new THREE.Vector3(direction.x * sx, 0, direction.z * sz));
+      const bend = (random() - .5) * .90;
+      const a = start.clone().lerp(end, .25).addScaledVector(sideways, bend).add(new THREE.Vector3(0, .18 + random() * .22, 0));
+      const b = start.clone().lerp(end, .64).addScaledVector(sideways, -bend * .7).add(new THREE.Vector3(0, .10 + random() * .18, 0));
+      const shade = load === largeCount - 1 && crownIndex % 3 === 1 ? crownPalette[3] : palette;
+      const width = (.32 + random() * .17) * Math.min(sx, sz), depth = .20 + random() * .19;
+      const paint = sweepVolume({ points: [start.toArray(), a.toArray(), b.toArray(), end.toArray()], width, depth, blade: true, crown: true, rows: 30, sides: 18, twist: (random() - .5) * .8, phase: random() * TAU, colorA: shade[0], colorB: shade[1] });
+      canopyParts.push(paint.geometry); deposits.push({ paint, depth, shade }); crownLoads++;
+    }
+    // Medium deposits bridge the large masses and make an irregular silhouette.
+    // They are substantially thicker than the former thin brush leaves.
+    for (let bough = 0; bough < 7; bough++) {
+      const angle = bough / 7 * TAU + crownIndex * .38 + (random() - .5) * .40;
       const extent = .87 + random() * .15, cosine = Math.cos(angle), sine = Math.sin(angle);
       const tip = new THREE.Vector3(p[0] + cosine * sx * extent, p[1] - sy * (.14 + random() * .31), p[2] + sine * sz * extent);
       const middle = new THREE.Vector3(p[0] + cosine * sx * .51, p[1] + sy * (.29 + random() * .14), p[2] + sine * sz * .51);
       const boughShape = sweepVolume({ points: [heart.toArray(), middle.toArray(), tip.toArray()], radius: [.075 + random() * .027, .009], rows: 24, sides: 10, phase: random() * TAU, flutes: 3, colorA: '#442027', colorB: '#9f5230' });
       barkParts.push(boughShape.geometry);
-      for (let node = 0; node < 5; node++) {
-        const t = .30 + node * .15 + (random() - .5) * .026;
+      for (let node = 0; node < 4; node++) {
+        const t = .23 + node * .20 + (random() - .5) * .045;
         const anchor = boughShape.curve.getPointAt(t);
-        for (let fan = 0; fan < 3; fan++) {
-          const spread = (fan - 1) * 1.04, direction = angle + spread + (random() - .5) * .34;
-          const length = .42 + random() * .29, width = .17 + random() * .135;
-          const base = anchor.clone().add(new THREE.Vector3(0, .01 + fan * .018, 0));
-          const end = base.clone().add(new THREE.Vector3(Math.cos(direction) * length, (fan === 1 ? .03 : -.07) - random() * .09, Math.sin(direction) * length));
-          const lift = .065 + random() * .063;
+        for (let fan = 0; fan < 2; fan++) {
+          const spread = (fan - .5) * 1.20, direction = angle + spread + (random() - .5) * .58;
+          const length = .74 + random() * .67, width = .32 + random() * .30;
+          const base = anchor.clone().add(new THREE.Vector3(0, .04 + fan * .04, 0));
+          const end = base.clone().add(new THREE.Vector3(Math.cos(direction) * length, -.10 - random() * .22, Math.sin(direction) * length));
+          const lift = .14 + random() * .20;
           const first = base.clone().lerp(end, .31).add(new THREE.Vector3(0, lift, 0));
           const second = base.clone().lerp(end, .75).add(new THREE.Vector3(0, lift * .42, 0));
-          const brightEdge = node > 2 && (bough + fan + crownIndex) % 4 === 0;
-          const shade = brightEdge ? crownPalette[3] : node < 2 ? crownPalette[0] : palette;
-          const leaf = sweepVolume({ points: [base.toArray(), first.toArray(), second.toArray(), end.toArray()], width, depth: .022 + random() * .014, blade: true, crown: true, rows: 15, sides: 10, twist: spread * .13 + (random() - .5) * .38, phase: random() * TAU, colorA: shade[0], colorB: shade[1] });
-          canopyParts.push(leaf.geometry); leafCount++;
+          const brightEdge = node > 1 && (bough + fan + crownIndex) % 7 === 0;
+          const shade = brightEdge ? crownPalette[3] : node < 2 ? crownPalette[crownIndex % 2] : palette;
+          const depth = .095 + random() * .10;
+          const paint = sweepVolume({ points: [base.toArray(), first.toArray(), second.toArray(), end.toArray()], width, depth, blade: true, crown: true, rows: 20, sides: 14, twist: spread * .28 + (random() - .5) * .78, phase: random() * TAU, colorA: shade[0], colorB: shade[1] });
+          canopyParts.push(paint.geometry); deposits.push({ paint, depth, shade }); leafCount++;
         }
       }
     }
-    // A few heavy, hanging ends make the crowns read as viscous pigment.
-    for (let drip = 0; drip < 3; drip++) {
-      const angle = -.5 + drip * 1.8 + crownIndex * .51;
-      const x = crown.p[0] + Math.cos(angle) * crown.size[0] * .72;
-      const z = crown.p[2] + Math.sin(angle) * crown.size[2] * .72;
-      const y = crown.p[1] - crown.size[1] * .34;
-      const drop = .7 + random() * 1.2;
-      const load = .07 + random() * .055;
-      const shape = sweepVolume({ points: [[x, y + .30, z], [x + .11, y, z + .13], [x + .08, y - drop * .64, z + .18], [x + .03, y - drop, z + .15]], radius: t => .007 + load * ((1 - t) ** 2 * .9 + .56 * Math.exp(-(((t - .85) / .105) ** 2))), rows: 30, sides: 12, phase: random() * TAU, twist: .25, flutes: 3, colorA: '#95501d', colorB: '#ddb653' });
-      goldParts.push(shape.geometry);
+    // Drips begin inside an actual deposit, not at guessed empty coordinates.
+    // Their necks merge into the mass and sag to a swollen, closed lower end.
+    for (let drip = 0; drip < 5; drip++) {
+      const deposit = deposits[(drip * 13 + crownIndex * 5) % deposits.length];
+      const start = deposit.paint.curve.getPointAt(.72 + random() * .16);
+      start.y -= deposit.depth * .22;
+      const { x, y, z } = start, drop = .65 + random() * 1.15, load = .09 + random() * .07;
+      const shade = drip % 3 === 0 ? crownPalette[3] : deposit.shade;
+      const shape = sweepVolume({ points: [[x, y + .09, z], [x + .07, y - .13, z + .05], [x + .10, y - drop * .68, z + .10], [x + .07, y - drop, z + .08]], radius: t => .008 + load * ((1 - t) ** 2 * 1.05 + .68 * Math.exp(-(((t - .85) / .11) ** 2))), rows: 26, sides: 12, phase: random() * TAU, twist: .20, flutes: 3, colorA: shade[0], colorB: shade[1] });
+      (drip % 3 === 0 ? goldParts : canopyParts).push(shape.geometry); attachedDrips++;
     }
   });
 
   const materials = [
     new THREE.MeshPhysicalMaterial({ color: 0xffffff, vertexColors: true, roughness: .43, clearcoat: .33, clearcoatRoughness: .33 }),
     new THREE.MeshPhysicalMaterial({ color: 0xffffff, vertexColors: true, roughness: .35, clearcoat: .48, clearcoatRoughness: .25 }),
-    new THREE.MeshPhysicalMaterial({ color: 0xffffff, vertexColors: true, roughness: .40, clearcoat: .36, clearcoatRoughness: .30 }),
-    new THREE.MeshPhysicalMaterial({ color: 0xffffff, vertexColors: true, roughness: .34, clearcoat: .45, clearcoatRoughness: .25 }),
+    new THREE.MeshPhysicalMaterial({ color: 0xffffff, vertexColors: true, roughness: .34, clearcoat: .55, clearcoatRoughness: .20 }),
+    new THREE.MeshPhysicalMaterial({ color: 0xffffff, vertexColors: true, roughness: .31, clearcoat: .58, clearcoatRoughness: .18 }),
   ];
   const names = ['hero-tree-twisted-bark', 'hero-tree-dragged-enamel', 'hero-tree-sculpted-canopy', 'hero-tree-pooled-gold'];
   const parts = [barkParts, enamelParts, canopyParts, goldParts], geometries = [];
   let triangles = 0;
   parts.forEach((pieces, index) => {
     const geometry = mergeParts(pieces), material = materials[index], mesh = new THREE.Mesh(geometry, material);
+    // Long, deposited roots follow the bank when this tree frames a cliff.
+    // Apply the same field to bark and enamel so their layers stay attached.
+    if(index<2 && typeof groundHeight==='function') {
+      const vertices=geometry.attributes.position;
+      for(let i=0;i<vertices.count;i++) {
+        const x=vertices.getX(i),y=vertices.getY(i),z=vertices.getZ(i);
+        if(y>1.35)continue;
+        const radial=clamp((Math.hypot(x,z)-1.2)/1.8,0,1);
+        const vertical=1-clamp((y-.65)/.7,0,1);
+        const contact=groundHeight(position[0]+x*scale,position[2]+z*scale);
+        if(Number.isFinite(contact))vertices.setY(i,y+(contact-position[1])/scale*radial*radial*(3-2*radial)*vertical);
+      }
+      geometry.computeVertexNormals();geometry.computeBoundingBox();geometry.computeBoundingSphere();
+    }
     geometry.name = names[index]; material.name = names[index]; mesh.name = names[index];
-    material.userData.pigmentSurface = index < 2 ? 'bark' : 'foliage';
+    material.userData.pigmentSurface = index < 2 ? 'bark' : 'crown';
+    // The crown profile retains its authored red/gold mixture and adds only
+    // fine brush relief to these large sculpted paint loads.
     mesh.userData.pigmentSurface = material.userData.pigmentSurface;
     mesh.userData.heroPaintedTree = true;
     mesh.castShadow = true; mesh.receiveShadow = true;
@@ -251,6 +287,8 @@ export function addPaintedTree(scene, { position = [0, 0, 0], seed = 42719, scal
   });
   group.userData.triangles = triangles;
   group.userData.brushLeaves = leafCount;
+  group.userData.largeCrownLoads = crownLoads;
+  group.userData.attachedCrownDrips = attachedDrips;
   group.userData.heroPaintedTree = true;
   scene.add(group);
   let disposed = false;

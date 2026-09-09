@@ -8,7 +8,7 @@ import { planCanyonPlanting } from '../src/render/canyon-planting.js';
 test('the canyon shelf connects its colours and portal around the tree and new groves',()=>{
   const pathX=z=>{const t=Math.max(0,Math.min(1,(15-z)/24));return Math.sin(t*Math.PI)*-1.4+7*t-3.5*(1-t)**2;};
   const planting=planCanyonPlanting({pathX,clearings:[[-5,4],[12,-3],[-7,-18]]});
-  const obstacles=[{x:-8.5,z:-3,radius:1.5},...planting.obstacles];
+  const obstacles=[{x:-9.3,z:3,radius:1.5},...planting.obstacles];
   for(const target of [{x:-5,z:4},{x:12,z:-3},{x:-7,z:-18},{x:7,z:-8}]){
     let p={x:-3.5,z:15};
     for(let i=0;i<800&&Math.hypot(target.x-p.x,target.z-p.z)>.02;i++){

@@ -1,28 +1,38 @@
-# Material and canyon revision verification — v14, 2026-09-10
+# Canyon and paint verification — v15, 2026-09-10
 
-The four worlds retain their twelve discoveries. This revision aligns pigment colour with sculpted relief, restores stronger cobalt/ochre paint values, deepens the continuous canyon faces, and adds terrace groves with route-aware collision proxies. [Material revision](../design/material-revision.md) records the implementation and rejected experiment.
+v15 keeps the original pigment/relief atlas with stronger 3D canyon deposits, shared stochastic texture coordinates and explicit texture gradients. The river opens into the entrance view, the tree frames the valley, and closed 3D herbs replace vegetation image cards in all four worlds. The four worlds and twelve discoveries remain. [Material revision](../design/material-revision.md) explains the implementation and source selection.
 
 ## Completed checks
 
-- `npm test`: 16 tests pass, including routes to the canyon's three colours and portal around the tree and new groves, and sustained sprinting against the canyon rim.
-- `npm run build`: succeeds; JavaScript 778.17 kB / 215.92 kB gzip. The configured 700 kB chunk advisory remains non-fatal.
-- The [CPU integration audit](canyon-integration-verification.json) passes with the decoded relief field, anchored material variants, grove collision routes and 409 observed owned resources disposed exactly once. It retains 12 shared textures. Two zero normals belong only to unused pole vertices; GPU upload/linking and temporary unattached resources are outside this audit.
-- v14 desktop captures visited all four worlds in High quality. Each reached a ready state and recorded actual keyboard movement. No page/console error, error panel or horizontal overflow was recorded.
-- v14 390 × 844 touch-viewport captures visited all four worlds in Auto quality without page/console errors, an error panel or horizontal overflow. These captures establish rendering and layout; movement controls are checked separately.
-- The v14 keyboard journey collected all twelve colours and restored all twelve after reload, with no recorded errors. Diagnostics were read for route planning; position and save data were not edited. Travel through the world selector returned keyboard focus to the canvas.
-- Desktop and emulated touch-viewport controls passed movement, drag-look, sound-toggle state, photo download, Low/High/Auto selection and return to the canyon entrance. The motion option was also exercised. Pointer-driven joystick movement was tested in the touch viewport; this was not a physical touchscreen test.
-- Six fresh canyon views covered the entrance, river overlook, tree/castle, west, south and east using keyboard movement and drag-look. All remained ready, with no recorded page/console errors or visible open horizon gaps in the inspected views. These samples are not exhaustive coverage of every location or angle.
+- `npm test`: 18 tests pass, including canyon discovery/portal routes around the final tree and groves, terrain safeguards and the updated river geometry.
+- `npm run build`: passes. The final classic-source JavaScript bundle is `index-CYk8n86f.js`, 784.08 kB / 218.86 kB gzip. Vite's configured 700 kB chunk-size advisory remains nonfatal.
+- The completed classic-source desktop run rendered all four worlds in High quality and recorded keyboard movement in each. All reached a ready state, with no recorded page/console errors, horizontal overflow or error panel.
+- All four worlds also reached ready state in the 390 × 844 emulated touch viewport with Auto quality, with no recorded page/console errors, horizontal overflow or error panel.
+- An actual keyboard journey collected all twelve colours across the four worlds and restored all twelve after reload, with no recorded page/console errors. The test used world-selection controls between worlds and checked that keyboard focus returned to the world canvas; it did not teleport the player or write the save data.
+- Desktop and mobile-layout control runs passed movement, drag-look, world selection, Low/High/Auto switching, PNG photo downloads and position reset. They also exercised the audio button and motion checkbox, with no recorded page/console errors or layout overflow. The audio-on button state was checked; audible output and the visual effect of disabling motion were not assessed.
+- The final High-quality canyon exploration captured six ready views—entrance, river overlook, tree/castle, west, south and east—using movement and drag-look controls, with no recorded page/console errors. This samples those locations and directions rather than every possible viewpoint.
+- The final v15 CPU integration audit passes finite geometry/instance data, canyon routes, material variants and resource lifetime checks. All 456 observed world-owned resources were disposed exactly once; 11 shared textures remained cached. Nine herb geometry variants across the exercised LODs have closed component topology.
 
-## Evidence and visual limits
+All five final classic-source browser runs completed successfully. Results from the rejected loaded-source runs and previous v14 are not counted as v15 verification.
 
-Packaged evidence: [browser-verification.json](browser-verification.json). [Night](screenshots/world-0.webp) · [Garden](screenshots/world-1.webp) · [Canyon](screenshots/world-2.webp) · [Coast](screenshots/world-3.webp) · [Mobile canyon](screenshots/mobile-canyon.webp) · [Journal](screenshots/journal-complete.webp). Raw v14 runs are retained in the local QA workspace; the packaged record identifies each run's scope.
+## Visual choice and limits
 
-The desktop entry set precedes only the final smooth cliff-join taper; mobile captures and the final directional inspection include it. The packaged canyon screenshot and portfolio photo cover use the entrance from that final inspection. Garden captures precede refreshing the canyon portal thumbnail, so that final thumbnail is outside their verification scope.
+A paired comparison with the same final geometry favoured the original **classic** atlas over the new loaded-paint source. Classic retains visible rolled paint edges and flowing highlights on the cliffs and path; the loaded source still resembled coloured rock and was rejected. The larger deposits, opened river, revised tree and vegetation changes remain.
 
-Actual browser views show richer paint colour and more visible cliff detail than the previous revision. Some ground and cliff surfaces still read as repeated decorative patterns; their smooth large shapes lack the reference's irregular rolled paint edges. The large central tree and flower beds partly obscure the river from the entrance. The tree's twisted trunk and separate leaves also remain visibly modeled. This revision does not establish reference-equivalent visual quality.
+The right cliff still has a rounded large-scale shape, some surface marks repeat, and the tree remains visibly modeled. The stochastic blend is continuous in value but can retain small slope/normal creases at triangle boundaries. These changes do not establish full fidelity to the supplied reference; the broader visual-quality goal remains open.
 
-The tested GPU is an NVIDIA GeForce GTX 1080 Ti through Chromium/ANGLE. Desktop High captures recorded roughly 18.1–18.2 ms median and 18.3 ms p95 frame intervals on this computer; these are short local observations, not hardware-independent performance guarantees. A touch viewport is not a physical-phone test. ANGLE recorded non-fatal shader warnings; no shader failure was observed.
+The plants, canyon, tree and nearby herbs are 3D; vegetation no longer uses crossed image cards. Distant castle and mountains remain fixed paintings on curved meshes, and their buildings cannot be entered. Sky and portal pictures are images. The relief is an artistic image-derived guide, not measured paint height or fluid simulation. Circular collision proxies cover important obstacles rather than every decorative surface.
 
-Near plants, tree and canyon are 3D. Middle-distance flowers also use crossed image planes. Distant castle and mountains are fixed paintings on curved meshes; their buildings cannot be entered. Sky and portal pictures are images. Relief is artistic geometry and shading, not physical paint-fluid simulation. Collision proxies cover important rocks, trunks and nearby groves rather than every decorative detail.
+Sampled cliff/terrain joins have small positive gaps: the forward near-bank maximum is 5.54 mm and the forward far-bank maximum is 24.34 mm. The largest sampled gap anywhere is 42.65 mm behind the spawn. The CPU audit uses a 50 mm tolerance; it does not establish watertight terrain joins.
+
+## Evidence scope
+
+Final evidence is packaged in [browser-verification.json](browser-verification.json) and the [CPU integration record](canyon-integration-verification.json), each with its own revision and limitations. [Night](screenshots/world-0.webp) · [Garden](screenshots/world-1.webp) · [Canyon](screenshots/world-2.webp) · [Coast](screenshots/world-3.webp) · [Mobile canyon](screenshots/mobile-canyon.webp) · [Journal](screenshots/journal-complete.webp).
+
+The garden captures precede the final canyon portal-thumbnail refresh; its deployed check belongs to the publication record. Shader-driver warnings are retained in the browser evidence.
+
+Browser runs use Chromium/ANGLE on an NVIDIA GeForce GTX 1080 Ti. The 390 × 844 emulated touch layout was operated with mouse input, including its joystick. This is not a physical-phone performance or touchscreen test. Recorded timing and render counts apply only to the tested views and machine.
+
+The short desktop High samples recorded approximately 18.2 ms median frame intervals. Their p95 values were 18.3 ms for night/canyon, 36.1 ms for garden and 36.3 ms for coast. These observations do not establish steady performance across all views or devices.
 
 [Publication record](publication.md) · [Canyon image provenance](../design/canyon-impasto-candidate-prompts.md).

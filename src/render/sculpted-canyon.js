@@ -5,18 +5,33 @@ import { makePouredPaintGeometry } from './poured-paint.js';
 const TAU = Math.PI * 2;
 const smooth = (a,b,x) => { const t=THREE.MathUtils.clamp((x-a)/(b-a),0,1); return t*t*(3-2*t); };
 const gauss = x => Math.exp(-x*x);
-export const canyonEdge = z => -9.2-3.3*gauss((z-4)/6)-6.5*gauss((z+18)/7)+1.4*Math.sin(z*.045);
-export const canyonRiverX = z => canyonEdge(z)-8.0-1.2*Math.sin(z*.08);
-export const canyonRiverLevel = z => .3+3.1*smooth(-2,2,-z)+3.3*smooth(30,34,-z)+2.0*smooth(68,74,-z);
-export const canyonRiverContains = (x,z) => Math.abs(x-canyonRiverX(z))<7.65 && z<72;
+// The river turns into the view beyond the colour-bearing walking shelf,
+// then away again beneath the distant citadel. Smaller shoulders belong to
+// each bank separately; they do not make two parallel extrusion rails.
+const canyonSpine = z => -10.3-2.1*gauss((z-4)/8)-4.9*gauss((z+17)/8)
+  +18.4*gauss((z+37)/19)-3.8*gauss((z+18)/5.5)-4.3*gauss((z+83)/19)+.75*Math.sin(z*.073);
+export const canyonEdge = z => canyonSpine(z)+.68*Math.sin(z*.31+.65*Math.sin(z*.083))
+  -.8*gauss((z-12)/3.8)+.62*gauss((z+7)/3.1);
+export const canyonRiverX = z => canyonSpine(z)-8.25-.7*Math.sin(z*.105+.4);
+const farEdge = z => canyonRiverX(z)-8.35+.75*Math.sin(z*.22+1.7)+1.2*gauss((z+10)/6);
+export const canyonRiverLevel = z => .3+3.1*smooth(-2,2,-z)+3.3*smooth(18,22,-z)+2.0*smooth(68,74,-z);
+export const canyonRiverContains = (x,z) => x>farEdge(z)+.2 && x<canyonEdge(z)-.25 && z<72;
 export function canyonHeight(x,z) {
-  const shelf=8.9+.23*Math.sin(z*.07)+.13*Math.sin(x*.17+z*.11);
-  const edge=canyonEdge(z), shore=smooth(edge-1.5,edge+1.0,x);
+  // A gently descending lookout exposes the water below the approach. All
+  // existing collection clearings remain on this continuous walkable shelf.
+  const edge=canyonEdge(z), shore=smooth(edge-2.05,edge+1.0,x);
+  const lookout=3.7*gauss((z-17)/11)*smooth(2.5,8.0,x-edge);
+  const shelf=8.85+1.95*smooth(-20,23,z)+lookout+.16*Math.sin(z*.079)+.10*Math.sin(x*.17+z*.11)
+    -1.8*smooth(-16,-24,z)*(1-smooth(-48,-66,z));
   const river=canyonRiverLevel(z)-.75;
-  const farBank=smooth(7.1,9.6,canyonRiverX(z)-x)*(13+4*Math.sin(z*.05)+2*Math.sin(z*.14));
-  const rightEdge=19+1.1*Math.sin(z*.19)+.4*Math.sin(z*.63);
-  const right=smooth(rightEdge-1,rightEdge+4,x)*(4+14*gauss((z-2)/13)+12*gauss((z+31)/15)+15*gauss((z+70)/23));
-  return THREE.MathUtils.lerp(river,shelf,shore)+farBank+right;
+  const farTop=13.8+3.7*gauss((z-3)/16)+3.1*gauss((z+49)/13)-2.4*gauss((z+25)/11)+1.2*Math.sin(z*.071);
+  const farBank=smooth(farEdge(z)+1.35,farEdge(z)-2.15,x)*(farTop-river);
+  const lipMass=(.55+.45*Math.sin(z*.35+.8*Math.sin(z*.12)))*gauss((x-edge-1.2)/2.35)*.70;
+  const rightEdge=19.8+2.1*Math.sin(z*.092+.55*Math.sin(z*.043))+1.0*Math.sin(z*.253);
+  const rightMass=5.0+13*gauss((z-1)/11)+11*gauss((z+34)/13)+15*gauss((z+75)/20);
+  const right=smooth(rightEdge-1.1,rightEdge+4.6,x)*rightMass
+    +1.35*gauss((x-rightEdge-2.2)/2.8)*(1+.52*Math.sin(z*.32+.7*Math.sin(z*.14)));
+  return THREE.MathUtils.lerp(river,shelf,shore)+farBank+right+lipMass*shore;
 }
 
 /** Continuous, walkable terrain and actual impasto forms share one height field. */
@@ -59,36 +74,46 @@ export function addSculptedCanyon(scene) {
     c.copy(palette[[0,1,4,3,5,2,0,6,4,5,1][((n%11)+11)%11]]).lerp(palette[[1,4,3,5,2,0,6,4,5,1,3][((n%11)+11)%11]],smooth(.78,1,f));
     c.multiplyScalar(.86+.18*Math.sin(p[2]*2.1+u*91)**2+.10*Math.sin(p[2]*23+u*140)**2);
   };
-  // A connected, irregular cross section rolls over each lip into a steep face.
+  // Broad masses overlap inside one continuous surface: swelling upper folds,
+  // longer lower drags and recessed seams share their surface and silhouette.
+  // The top and submerged foot remain attached to the same terrain field.
   for(const bank of ['near','far']) surface(68,800,(u,t)=>{
-    const z=72-t*200,edge=bank==='near'?canyonEdge(z):canyonRiverX(z)-8.2;
-    const top=bank==='near'?canyonHeight(edge+1.15,z):canyonHeight(edge-2.1,z),bottom=canyonRiverLevel(z)-.9;
-    const flow=Math.sin(z*.29+u*4)*.21+Math.sin(z*1.8-u*15)*.065+Math.sin(z*14+u*6)*.013;
-    const outward=Math.sin(u*Math.PI)*((bank==='far'?1.25:.42)+.14*Math.sin(u*47+z*.22));
-    const x=edge+(bank==='near'?1.18-u*3.0-outward:-2.18+u*3.0+outward)+flow*Math.sin(Math.PI*u);
-    // Paint first spreads across the shelf, rolls over the lip, then descends.
-    // A linear drop here was buried by the terrain's smooth upper shoulder.
-    const descent=smooth(.10,1,u);
-    const y=top*(1-descent)+bottom*descent+.09*(1-u);
+    const near=bank==='near',z=72-t*200,edge=near?canyonEdge(z):farEdge(z);
+    const sign=near?-1:1,start=edge-sign*(near?1.65:3.15),end=edge+sign*2.13;
+    // Begin inside the level shelf instead of on a grid-interpolated ramp.
+    // A small embedded seam remains sealed under the finer physical relief.
+    const top=canyonHeight(start,z)-.065,bottom=canyonRiverLevel(z)-.92;
+    const envelope=Math.sin(u*Math.PI),phase=z*(near?.36:.28)+(near?0:2.1)+.58*Math.sin(z*.093);
+    const shoulder=Math.max(0,Math.sin(phase+u*1.7))**3;
+    const lower=Math.max(0,Math.cos(phase*.73-u*3.2+.7))**4;
+    const tucked=.24*(.5+.5*Math.sin(z*1.17+u*3.1))**8;
+    const swelling=(.43+1.36*shoulder+.52*lower-tucked)*envelope**1.15;
+    const dragged=.12*Math.sin(z*1.31+u*2.8)+.033*Math.sin(z*5.8+u*6);
+    const x=THREE.MathUtils.lerp(start,end,u)+sign*(swelling+dragged*envelope);
+    const fold=.055*Math.sin(phase+u*6.4)*envelope;
+    const descent=smooth(.13,1,THREE.MathUtils.clamp(u+fold,0,1));
+    const y=top*(1-descent)+bottom*descent+.42*shoulder*envelope*(1-u);
     return [x,y,z];
   },cliffColor,cliffMat,`canyon-${bank}-continuous-paint-face`,bank==='far');
   surface(96,900,(u,t)=>{
-    const z=74-t*207,x=canyonRiverX(z)+(u-.5)*15.6;
-    const flow=u*31+Math.sin(z*.085)*.65+Math.sin(z*.38+u*4)*.11;
-    const ridge=.08*Math.sin(flow*TAU)**4+.025*Math.sin(flow*TAU*2.07)**6;
-    return [x,canyonRiverLevel(z)+ridge+.028*Math.sin(z*.36+u*14),z];
+    const z=74-t*207,x=THREE.MathUtils.lerp(farEdge(z)+.18,canyonEdge(z)-.32,u);
+    const pool=.09*gauss((z+25)/13)*Math.sin(u*TAU+z*.11)+.075*gauss((z+59)/11)*Math.sin(u*TAU-z*.14);
+    const flow=u+.038*Math.sin(z*.16+u*6)+pool;
+    const ridge=.085*Math.sin(flow*TAU*23)**4+.026*Math.sin(flow*TAU*46.3+z*.031)**6;
+    return [x,canyonRiverLevel(z)+ridge+.034*Math.sin(z*.29+flow*15),z];
   },(c,u,t,p)=>{
-    const wave=u*8+Math.sin(p[2]*.082)*.20+Math.sin(p[2]*.34+u*8)*.045;
+    const z=p[2],pool=.09*gauss((z+25)/13)*Math.sin(u*TAU+z*.11)+.075*gauss((z+59)/11)*Math.sin(u*TAU-z*.14);
+    const wave=(u+.038*Math.sin(z*.16+u*6)+pool)*6.3+.14*Math.sin(z*.074);
     const strip=Math.floor(wave),f=wave-strip;
-    c.copy(palette[[1,0,2,4,5,3,1,0,2][((strip%9)+9)%9]]).lerp(palette[[0,2,4,5,3,1,0,2,1][((strip%9)+9)%9]],smooth(.76,1,f));
+    c.copy(palette[[1,0,2,1,4,5,0,1,2][((strip%9)+9)%9]]).lerp(palette[[0,2,1,4,5,0,1,2,1][((strip%9)+9)%9]],smooth(.78,1,f));
     c.multiplyScalar(.87+.17*Math.sin(u*175+Math.sin(p[2]*.2)*4)**2);
   },flowMat,'continuous-viscous-canyon-river',true).castShadow=false;
 
   const pours=palette.map((color,i)=>physical(color,'canyon',{roughness:i%3===0?.36:.44})),buckets=pours.map(()=>[]);
   // Wide paint sheets fuse the high terraces to the river, with uneven pooled ends.
   for(let k=0;k<26;k++){
-    const z=25-k*4.9,far=k%3!==0,edge=far?canyonRiverX(z)-8.2:canyonEdge(z);
-    const y=canyonHeight(edge+(far?-2.1:1.15),z),h=y-canyonRiverLevel(z)-.16;
+    const z=25-k*4.9,far=k%3!==0,edge=far?farEdge(z):canyonEdge(z);
+    const y=canyonHeight(edge+(far?-1.65:1.65),z),h=y-canyonRiverLevel(z)-.16;
     if(h<1.4)continue;
     const g=makePouredPaintGeometry(1.2+(k%4)*.41,h*.93,613+k*147);
     g.scale(1,1,2.7);g.rotateY(far?Math.PI/2:-Math.PI/2);g.translate(edge+(far?-1.0:.47),y+.04,z);buckets[(k*3+4)%7].push(g);

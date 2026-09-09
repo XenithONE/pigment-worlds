@@ -34,4 +34,4 @@ Create an exquisite original oil painting with palpable impasto, 3:4 portrait co
 
 The original generated birch-grove portal was replaced in `public/art/golden-portal.webp` by the actual canyon entrance photo taken with the in-game photo control. It is a portrait crop of the same live-render photo used for `public/art/cover.webp`. The original generation prompt above remains as provenance of the earlier asset, not the current runtime picture.
 
-The v14 revision refreshes both pictures from the final canyon inspection's actual photo download, including aligned pigment relief, cypress groves and the adopted impasto panorama. The portfolio cover uses the same uncomposited in-game photograph.
+The v15 revision refreshes both pictures from the final canyon inspection's actual photo download, including the thick red-gold crown, sculpted herbs, expanded cliff deposits and the open S-shaped river. The portfolio cover uses the same uncomposited in-game photograph.
